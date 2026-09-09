@@ -1,0 +1,4 @@
+interface:
+  display_name: "Elliott Outcome Review"
+  short_description: "Guard Phase 11 forecast and outcome workflows"
+  default_prompt: "Use $elliott-outcome-review to modify or review the Phase 11 forecast, outcome, and mistake-memory workflow safely."

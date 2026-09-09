@@ -1,0 +1,5 @@
+# Install requirements.txt first for the Windows ZoneInfo database.
+# These packages are needed only by historical analysis and DOCX report scripts.
+numpy
+pandas
+python-docx

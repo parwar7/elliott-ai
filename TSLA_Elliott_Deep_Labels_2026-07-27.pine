@@ -1,0 +1,250 @@
+//@version=6
+indicator("TSLA Elliott Deep Labels 2026-07-27", overlay=true, max_labels_count=500)
+
+detailView = input.string(
+     "Auto",
+     "Wave detail",
+     options=["Auto", "All", "High degree", "Current W", "Current X", "Current Y", "Terminal y"])
+
+cycleColor = color.rgb(185, 28, 28)
+primaryColor = color.rgb(37, 99, 235)
+diagonalColor = color.rgb(8, 145, 178)
+correctionColor = color.rgb(190, 24, 93)
+combinationColor = color.rgb(13, 148, 136)
+abcColor = color.rgb(217, 119, 6)
+impulseColor = color.rgb(126, 34, 206)
+subwaveColor = color.rgb(79, 70, 229)
+microColor = color.rgb(14, 116, 144)
+reversalColor = color.rgb(21, 128, 61)
+
+var labels = array.new<label>()
+
+clearLabels() =>
+    while array.size(labels) > 0
+        label.delete(array.pop(labels))
+
+utc(int year, int month, int day, int hour, int minute) =>
+    timestamp("GMT+0", year, month, day, hour, minute)
+
+addPivot(
+     int labelTime,
+     float pivotPrice,
+     string labelText,
+     color textColor,
+     bool above,
+     int stack,
+     string textSize) =>
+    spacing = math.max(pivotPrice * 0.008, 1.5)
+    labelPrice = pivotPrice + (above ? 1 : -1) * spacing * (stack + 1)
+    newLabel = label.new(
+         labelTime,
+         labelPrice,
+         labelText,
+         xloc=xloc.bar_time,
+         yloc=yloc.price,
+         style=label.style_none,
+         textcolor=textColor,
+         size=textSize,
+         textalign=text.align_center)
+    array.push(labels, newLabel)
+
+if barstate.islast
+    clearLabels()
+
+    isTsla = str.contains(syminfo.tickerid, "TSLA")
+    chartSeconds = timeframe.in_seconds()
+    isAuto = detailView == "Auto"
+    isAll = detailView == "All"
+    focusHigh = detailView == "High degree"
+    focusW = detailView == "Current W"
+    focusX = detailView == "Current X"
+    focusY = detailView == "Current Y"
+    focusTerminal = detailView == "Terminal y"
+
+    showHighDegree = isTsla and (isAll or focusHigh or (isAuto and chartSeconds >= timeframe.in_seconds("1W")))
+    showHistoricChildren = isTsla and (isAll or focusHigh or (isAuto and chartSeconds >= timeframe.in_seconds("1D")))
+    showEndingDiagonal = isTsla and (isAll or focusHigh or (isAuto and chartSeconds >= timeframe.in_seconds("1D")))
+    showOuterCorrection = isTsla and chartSeconds <= timeframe.in_seconds("1W")
+    showW = isTsla and (isAll or focusW or (isAuto and chartSeconds <= timeframe.in_seconds("240")))
+    showX = isTsla and (isAll or focusX or (isAuto and chartSeconds <= timeframe.in_seconds("240")))
+    showY = isTsla and (isAll or focusY or focusTerminal or (isAuto and chartSeconds <= timeframe.in_seconds("1D")))
+    showNestedW = isTsla and (isAll or focusW or (isAuto and chartSeconds <= timeframe.in_seconds("60")))
+    showNestedY = isTsla and (isAll or focusY or focusTerminal or (isAuto and chartSeconds <= timeframe.in_seconds("60")))
+    showMotive = isTsla and chartSeconds <= timeframe.in_seconds("15") and (isAuto or isAll or focusX or focusY or focusTerminal)
+    showDeepMotive = isTsla and chartSeconds <= timeframe.in_seconds("5") and (isAuto or isAll or focusY or focusTerminal)
+    showMicro = isTsla and chartSeconds <= timeframe.in_seconds("1") and (isAuto or isAll or focusY or focusTerminal)
+
+    if showHighDegree
+        // A complete listed-history motive candidate. The absolute degree name
+        // remains unresolved, so the labels identify relative hierarchy only.
+        addPivot(utc(2014, 9, 4, 13, 30), 19.427981, "I", cycleColor, true, 0, size.normal)
+        addPivot(utc(2016, 2, 9, 14, 30), 9.403324, "II", cycleColor, false, 0, size.normal)
+        addPivot(utc(2021, 11, 4, 13, 30), 414.496252, "III", cycleColor, true, 0, size.normal)
+        addPivot(utc(2023, 1, 6, 14, 30), 101.81, "IV", cycleColor, false, 0, size.normal)
+        addPivot(utc(2025, 12, 22, 14, 30), 498.83, "V", cycleColor, true, 1, size.normal)
+
+    if showHistoricChildren
+        // Five children inside listed Wave I.
+        addPivot(utc(2010, 12, 1, 14, 30), 2.427998, "1", primaryColor, true, 0, size.small)
+        addPivot(utc(2011, 2, 23, 14, 30), 1.407332, "2", primaryColor, false, 0, size.small)
+        addPivot(utc(2013, 9, 30, 13, 30), 12.966654, "3", primaryColor, true, 0, size.small)
+        addPivot(utc(2013, 11, 26, 14, 30), 7.739992, "4", primaryColor, false, 0, size.small)
+        addPivot(utc(2014, 9, 4, 13, 30), 19.427981, "5", primaryColor, true, 1, size.small)
+
+        // Flat candidate inside listed Wave II.
+        addPivot(utc(2015, 3, 27, 13, 30), 12.093321, "A", abcColor, false, 0, size.small)
+        addPivot(utc(2015, 7, 20, 13, 30), 19.109981, "B", abcColor, true, 0, size.small)
+        addPivot(utc(2016, 2, 9, 14, 30), 9.403324, "C", abcColor, false, 1, size.small)
+
+        // Five children inside listed Wave III.
+        addPivot(utc(2017, 9, 18, 13, 30), 25.973974, "1", primaryColor, true, 0, size.small)
+        addPivot(utc(2019, 6, 3, 13, 30), 11.799448, "2", primaryColor, false, 0, size.small)
+        addPivot(utc(2021, 1, 25, 14, 30), 300.133033, "3", primaryColor, true, 0, size.small)
+        addPivot(utc(2021, 3, 5, 14, 30), 179.82982, "4", primaryColor, false, 0, size.small)
+        addPivot(utc(2021, 11, 4, 13, 30), 414.496252, "5", primaryColor, true, 1, size.small)
+
+        // Zigzag candidate inside listed Wave IV.
+        addPivot(utc(2022, 5, 24, 13, 30), 206.85646, "A", abcColor, false, 0, size.small)
+        addPivot(utc(2022, 8, 16, 13, 30), 314.666352, "B", abcColor, true, 0, size.small)
+        addPivot(utc(2023, 1, 6, 14, 30), 101.81, "C", abcColor, false, 1, size.small)
+
+    if showEndingDiagonal
+        // Ending-diagonal candidate inside listed Wave V.
+        addPivot(utc(2023, 7, 19, 13, 30), 299.29, "(1)", diagonalColor, true, 0, size.small)
+        addPivot(utc(2024, 4, 22, 13, 30), 138.8025, "(2)", diagonalColor, false, 0, size.small)
+        addPivot(utc(2024, 12, 18, 14, 30), 488.5399, "(3)", diagonalColor, true, 0, size.small)
+        addPivot(utc(2025, 4, 7, 13, 30), 214.25, "(4)", diagonalColor, false, 0, size.small)
+        addPivot(utc(2025, 12, 22, 14, 30), 498.83, "(5)", diagonalColor, true, 0, size.small)
+
+    if showOuterCorrection
+        // Preferred active combination from the 498.83 high.
+        addPivot(utc(2026, 4, 7, 15, 0), 337.25, "W", correctionColor, false, 0, size.normal)
+        addPivot(utc(2026, 5, 13, 15, 30), 453.4, "X", correctionColor, true, 0, size.normal)
+        addPivot(utc(2026, 7, 24, 18, 35), 306.51, "Y?", correctionColor, false, 5, size.normal)
+
+    if showW
+        // Outer W is a nested double-three candidate.
+        addPivot(utc(2026, 2, 5, 15, 15), 387.545, "w", combinationColor, false, 0, size.small)
+        addPivot(utc(2026, 2, 11, 14, 30), 436.35, "x", combinationColor, true, 0, size.small)
+        addPivot(utc(2026, 4, 7, 15, 0), 337.25, "y", combinationColor, false, 1, size.small)
+
+    if showNestedW
+        // First w inside W.
+        addPivot(utc(2026, 1, 20, 20, 30), 417.46, "w", microColor, false, 0, size.tiny)
+        addPivot(utc(2026, 1, 23, 16, 0), 452.43, "x", microColor, true, 0, size.tiny)
+        addPivot(utc(2026, 2, 5, 15, 15), 387.545, "y", microColor, false, 1, size.tiny)
+
+        // Terminal y inside W.
+        addPivot(utc(2026, 3, 9, 14, 0), 381.4, "w", microColor, false, 0, size.tiny)
+        addPivot(utc(2026, 3, 11, 14, 0), 416.35, "x", microColor, true, 0, size.tiny)
+        addPivot(utc(2026, 4, 7, 15, 0), 337.25, "y", microColor, false, 2, size.tiny)
+
+        addPivot(utc(2026, 3, 20, 19, 30), 364.48, "w", combinationColor, false, 0, size.tiny)
+        addPivot(utc(2026, 3, 25, 13, 30), 396.23, "x", combinationColor, true, 0, size.tiny)
+        addPivot(utc(2026, 4, 7, 15, 0), 337.25, "y", combinationColor, false, 3, size.tiny)
+
+        addPivot(utc(2026, 3, 30, 19, 30), 352.14, "w", microColor, false, 0, size.tiny)
+        addPivot(utc(2026, 4, 1, 15, 45), 383.13, "x", microColor, true, 0, size.tiny)
+        addPivot(utc(2026, 4, 7, 15, 0), 337.25, "y", microColor, false, 4, size.tiny)
+
+    if showX
+        // X is a clean 5-3-5 zigzag.
+        addPivot(utc(2026, 4, 17, 15, 15), 409.29, "A", abcColor, true, 0, size.small)
+        addPivot(utc(2026, 4, 27, 15, 15), 364.02, "B", abcColor, false, 0, size.small)
+        addPivot(utc(2026, 5, 13, 15, 30), 453.4, "C", abcColor, true, 1, size.small)
+
+    if showY
+        // Outer Y is a w-x-y combination.
+        addPivot(utc(2026, 6, 26, 13, 30), 368.6, "w", combinationColor, false, 0, size.small)
+        addPivot(utc(2026, 7, 1, 15, 25), 432.85, "x", combinationColor, true, 0, size.small)
+        addPivot(utc(2026, 7, 24, 18, 35), 306.51, "y?", combinationColor, false, 4, size.small)
+
+        // The x connector is a zigzag candidate.
+        addPivot(utc(2026, 6, 26, 15, 30), 387.8, "A", abcColor, true, 0, size.tiny)
+        addPivot(utc(2026, 6, 26, 19, 30), 378.57, "B", abcColor, false, 0, size.tiny)
+        addPivot(utc(2026, 7, 1, 15, 25), 432.85, "C", abcColor, true, 1, size.tiny)
+
+        // Terminal y is a 5-3-5 zigzag.
+        addPivot(utc(2026, 7, 2, 19, 20), 389.31, "A", abcColor, false, 0, size.small)
+        addPivot(utc(2026, 7, 6, 19, 45), 419.99, "B", abcColor, true, 0, size.small)
+        addPivot(utc(2026, 7, 24, 18, 35), 306.51, "C", abcColor, false, 3, size.small)
+
+    if showNestedY
+        // Nested combinations inside Y.w.
+        addPivot(utc(2026, 5, 19, 14, 45), 393.66, "w", microColor, false, 0, size.tiny)
+        addPivot(utc(2026, 5, 27, 14, 45), 445.59, "x", microColor, true, 0, size.tiny)
+        addPivot(utc(2026, 6, 26, 13, 30), 368.6, "y", microColor, false, 1, size.tiny)
+
+        addPivot(utc(2026, 6, 5, 19, 15), 388.6, "w", combinationColor, false, 0, size.tiny)
+        addPivot(utc(2026, 6, 9, 13, 30), 418.5, "x", combinationColor, true, 0, size.tiny)
+        addPivot(utc(2026, 6, 26, 13, 30), 368.6, "y", combinationColor, false, 2, size.tiny)
+
+        addPivot(utc(2026, 6, 10, 19, 15), 380.15, "w", microColor, false, 0, size.tiny)
+        addPivot(utc(2026, 6, 15, 13, 30), 416.0, "x", microColor, true, 0, size.tiny)
+        addPivot(utc(2026, 6, 26, 13, 30), 368.6, "y", microColor, false, 3, size.tiny)
+
+        addPivot(utc(2026, 6, 18, 14, 30), 384.7, "w", combinationColor, false, 0, size.tiny)
+        addPivot(utc(2026, 6, 22, 14, 0), 414.74, "x", combinationColor, true, 0, size.tiny)
+        addPivot(utc(2026, 6, 26, 13, 30), 368.6, "y", combinationColor, false, 4, size.tiny)
+
+    if showMotive
+        // Five waves in X.A.
+        addPivot(utc(2026, 4, 8, 13, 30), 364.5, "1", impulseColor, true, 0, size.tiny)
+        addPivot(utc(2026, 4, 9, 14, 0), 337.26, "2", impulseColor, false, 0, size.tiny)
+        addPivot(utc(2026, 4, 15, 19, 45), 394.66, "3", impulseColor, true, 0, size.tiny)
+        addPivot(utc(2026, 4, 16, 13, 45), 381.81, "4", impulseColor, false, 0, size.tiny)
+        addPivot(utc(2026, 4, 17, 15, 15), 409.29, "5", impulseColor, true, 1, size.tiny)
+
+        // Five waves in X.C.
+        addPivot(utc(2026, 5, 1, 15, 45), 396.48, "1", impulseColor, true, 0, size.tiny)
+        addPivot(utc(2026, 5, 6, 13, 30), 384.02, "2", impulseColor, false, 0, size.tiny)
+        addPivot(utc(2026, 5, 11, 19, 0), 449.16, "3", impulseColor, true, 0, size.tiny)
+        addPivot(utc(2026, 5, 12, 16, 45), 422.28, "4", impulseColor, false, 0, size.tiny)
+        addPivot(utc(2026, 5, 13, 15, 30), 453.4, "5", impulseColor, true, 2, size.tiny)
+
+        // Five waves in terminal Y.y.A.
+        addPivot(utc(2026, 7, 1, 18, 40), 423.73, "1", impulseColor, false, 0, size.tiny)
+        addPivot(utc(2026, 7, 2, 13, 30), 432.35, "2", impulseColor, true, 0, size.tiny)
+        addPivot(utc(2026, 7, 2, 15, 20), 394.25, "3", impulseColor, false, 0, size.tiny)
+        addPivot(utc(2026, 7, 2, 15, 40), 400.8, "4", impulseColor, true, 0, size.tiny)
+        addPivot(utc(2026, 7, 2, 19, 20), 389.31, "5", impulseColor, false, 1, size.tiny)
+
+        // Five waves in terminal Y.y.C.
+        addPivot(utc(2026, 7, 8, 18, 45), 390.52, "1", impulseColor, false, 0, size.tiny)
+        addPivot(utc(2026, 7, 10, 16, 45), 413.15, "2", impulseColor, true, 0, size.tiny)
+        addPivot(utc(2026, 7, 20, 19, 45), 369.435, "3", impulseColor, false, 0, size.tiny)
+        addPivot(utc(2026, 7, 21, 14, 45), 384.06, "4", impulseColor, true, 0, size.tiny)
+        addPivot(utc(2026, 7, 24, 18, 35), 306.51, "5", impulseColor, false, 2, size.tiny)
+
+    if showDeepMotive
+        // Five children inside terminal C Wave 3.
+        addPivot(utc(2026, 7, 13, 19, 15), 391.37, "1", subwaveColor, false, 0, size.tiny)
+        addPivot(utc(2026, 7, 15, 13, 30), 406.6, "2", subwaveColor, true, 0, size.tiny)
+        addPivot(utc(2026, 7, 17, 13, 30), 377.23, "3", subwaveColor, false, 0, size.tiny)
+        addPivot(utc(2026, 7, 20, 13, 30), 386.52, "4", subwaveColor, true, 0, size.tiny)
+        addPivot(utc(2026, 7, 20, 19, 45), 369.435, "5", subwaveColor, false, 1, size.tiny)
+
+        // Five children inside terminal C Wave 5.
+        addPivot(utc(2026, 7, 22, 13, 30), 374.89, "1", subwaveColor, false, 0, size.tiny)
+        addPivot(utc(2026, 7, 22, 13, 55), 380.15, "2", subwaveColor, true, 0, size.tiny)
+        addPivot(utc(2026, 7, 23, 19, 45), 315.735, "3", subwaveColor, false, 0, size.tiny)
+        addPivot(utc(2026, 7, 23, 19, 56), 323.4, "4", subwaveColor, true, 0, size.tiny)
+        addPivot(utc(2026, 7, 24, 18, 35), 306.51, "5", subwaveColor, false, 1, size.tiny)
+
+    if showMicro
+        // One-minute resolution inside the gap-driven third.
+        addPivot(utc(2026, 7, 23, 13, 40), 332.8, "1", microColor, false, 0, size.tiny)
+        addPivot(utc(2026, 7, 23, 13, 42), 336.2, "2", microColor, true, 0, size.tiny)
+        addPivot(utc(2026, 7, 23, 15, 29), 318.56, "3", microColor, false, 0, size.tiny)
+        addPivot(utc(2026, 7, 23, 16, 24), 326.36, "4", microColor, true, 0, size.tiny)
+        addPivot(utc(2026, 7, 23, 19, 45), 315.735, "5", microColor, false, 1, size.tiny)
+
+        // One-minute resolution inside the final fifth.
+        addPivot(utc(2026, 7, 24, 13, 32), 317.51, "1", microColor, false, 0, size.tiny)
+        addPivot(utc(2026, 7, 24, 13, 35), 322.95, "2", microColor, true, 0, size.tiny)
+        addPivot(utc(2026, 7, 24, 14, 43), 308.5, "3", microColor, false, 0, size.tiny)
+        addPivot(utc(2026, 7, 24, 15, 1), 312.58, "4", microColor, true, 0, size.tiny)
+        addPivot(utc(2026, 7, 24, 18, 35), 306.51, "5", microColor, false, 0, size.tiny)
+
+        // Smallest confirmed rebound from the working low.
+        addPivot(utc(2026, 7, 24, 19, 59), 313.21, "i?", reversalColor, true, 0, size.tiny)

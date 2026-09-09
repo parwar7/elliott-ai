@@ -1,0 +1,34 @@
+# Credentials and local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+.codex/
+# Private database and runtime state
+.elliott_ai/
+*.sqlite*
+*.db
+*.db-*
+# Installed dependencies and generated Python output
+.codex_deps/
+.venv/
+venv/
+node_modules/
+__pycache__/
+*.py[cod]
+*.exe
+*.pyd
+# Local data, diagnostics, and large generated artifacts
+analysis_input/
+phase11_input/
+adaptive_recount_runs/
+market_scans/
+handoff_packages/
+source_attachments/
+inputs/
+reports/
+*.zip
+*.log
+.DS_Store
+Thumbs.db

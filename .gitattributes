@@ -1,0 +1,2 @@
+# Preserve exact source bytes, including hash-sensitive fixture line endings.
+* -text

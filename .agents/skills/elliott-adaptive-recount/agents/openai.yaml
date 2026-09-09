@@ -1,0 +1,4 @@
+interface:
+  display_name: "Elliott Adaptive Recount"
+  short_description: "Run blind adaptive counts with recursive proof"
+  default_prompt: "Use $elliott-adaptive-recount to run a strict staged blind Elliott recount with validated native data, independent Primary and Alternative candidates, recursive deterministic proof, and an explicit final freeze."

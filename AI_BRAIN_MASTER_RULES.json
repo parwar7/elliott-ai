@@ -1,0 +1,871 @@
+﻿{
+    "0_MasterExecutionPipeline":  {
+                                      "purpose":  "Instructs the trading script on the exact chronological and hierarchical loop required to analyze a chart from its absolute origin to the live real-time price.",
+                                      "Phase_1_Origin_Initialization":  {
+                                                                            "action":  "Fetch maximum historical data on the highest timeframe (Monthly or 3-Month).",
+                                                                            "step_1":  "Locate the absolute all-time lowest price (for bull markets) or highest price (for bear markets). This is \u0027Point Zero\u0027.",
+                                                                            "step_2":  "Anchor the Grand Supercycle [I] or Supercycle ((I)) to this exact date and price."
+                                                                        },
+                                      "Phase_2_Macro_Scanning":  {
+                                                                     "timeframe":  "Monthly / Weekly",
+                                                                     "action":  "Run SwingPivotDetectionEngine on the highest timeframe using Macro pivot parameters.",
+                                                                     "step_1":  "Identify the largest completed swings from Point Zero to the present.",
+                                                                     "step_2":  "Apply WaveDecompositionEngine to label these as Parent Waves (e.g., Waves I, II, III, IV, V).",
+                                                                     "step_3":  "Lock the exact \u0027start_date\u0027, \u0027end_date\u0027, \u0027start_price\u0027, and \u0027end_price\u0027 for every completed Parent Wave."
+                                                                 },
+                                      "Phase_3_Recursive_Drill_Down_Constraint":  {
+                                                                                      "concept":  "The Russian Doll Constraint. Lower timeframe data MUST be constrained by the Parent Wave\u0027s boundaries.",
+                                                                                      "loop_logic":  [
+                                                                                                         "1. For every Parent Wave locked in Phase 2, slice the lower timeframe array (e.g., Daily) between the Parent\u0027s \u0027start_date\u0027 and \u0027end_date\u0027.",
+                                                                                                         "2. The script is FORBIDDEN from looking outside this time slice when calculating internal subwaves.",
+                                                                                                         "3. The starting subwave (e.g., wave 1 or A) MUST start at the Parent\u0027s exact \u0027start_price\u0027.",
+                                                                                                         "4. The ending subwave (e.g., wave 5 or C) MUST end at the Parent\u0027s exact \u0027end_price\u0027."
+                                                                                                     ],
+                                                                                      "validation":  "If the Parent is an Impulse, the script must force the SwingPivotDetectionEngine to find 5 valid pivots inside that specific time slice. If it cannot find 5 valid pivots that obey Elliott rules, reduce the confidence score of the Parent Wave and flag as \u0027Unproven Internal Structure\u0027.",
+                                                                                      "top_down_detail_rule_from_video":  {
+                                                                                                                              "source":  "Video_TxpTOT5AQwM_2026-07-13",
+                                                                                                                              "rule":  "After the highest timeframe parent is labeled, lower timeframes must only fill in progressively smaller subwaves. They must not create a new parent count that conflicts with the higher timeframe."
+                                                                                                                          }
+                                                                                  },
+                                      "Phase_4_Multi_Timeframe_Cascade":  {
+                                                                              "action":  "Repeat Phase 3 recursively down the timeframes.",
+                                                                              "sequence":  [
+                                                                                               "Monthly Parent -\u003e constrains Weekly subwaves.",
+                                                                                               "Weekly Parent -\u003e constrains Daily subwaves.",
+                                                                                               "Daily Parent -\u003e constrains 4H subwaves.",
+                                                                                               "4H Parent -\u003e constrains 1H subwaves."
+                                                                                           ],
+                                                                              "termination":  "Stop historical recursion when you reach the 1H timeframe to save compute power, unless the parent wave is unusually short.",
+                                                                              "video_degree_sequence":  {
+                                                                                                            "source":  "Video_TxpTOT5AQwM_2026-07-13",
+                                                                                                            "sequence":  [
+                                                                                                                             "Weekly",
+                                                                                                                             "Daily",
+                                                                                                                             "4H",
+                                                                                                                             "1H"
+                                                                                                                         ],
+                                                                                                            "rule":  "Start from the highest practical timeframe, then zoom in. The 1H chart is a street map; weekly is the world map. Never analyze the 1H in isolation."
+                                                                                                        }
+                                                                          },
+                                      "Phase_5_Live_Edge_Processing":  {
+                                                                           "action":  "Analyze the active, uncompleted wave using real-time TradingView data.",
+                                                                           "step_1":  "Identify the last locked macro pivot (e.g., the start of current Wave 5).",
+                                                                           "step_2":  "Use 1H and 15m live data streams to track the active subwaves forming in real-time.",
+                                                                           "step_3":  "Run WaveMeasurementEngine to project Fibonacci targets for the live price action.",
+                                                                           "step_4":  "Constantly check MACD momentum and signal-line behavior on the live 1H/15m chart as supporting evidence for wave termination.",
+                                                                           "map_vs_execution_warning":  {
+                                                                                                            "source":  "Video_TxpTOT5AQwM_2026-07-13",
+                                                                                                            "rule":  "A projected Elliott path is a probability map, not a complete trading system. Live entries require execution triggers, stop location, and position sizing."
+                                                                                                        }
+                                                                       },
+                                      "Phase_2A_Degree_Reading_Gate":  {
+                                                                           "source":  "Video_TxpTOT5AQwM_2026-07-13",
+                                                                           "purpose":  "Prevent the AI from mixing wave degrees or forcing labels before the chart context is understood.",
+                                                                           "action":  "Before interpreting any Elliott label, identify the same-degree labels first, then identify the largest visible degree structure, then drill downward.",
+                                                                           "rules":  [
+                                                                                         "Read same-degree labels together. Do not connect or compare labels from different degrees as if they belong to the same cycle.",
+                                                                                         "Largest visible degree controls the chart interpretation. Smaller labels are subwaves/details inside that parent.",
+                                                                                         "A lower timeframe is only a zoomed-in version of the higher timeframe parent. It must tie back to the same parent anchors and connectors.",
+                                                                                         "If a chart starts after the true historical origin and the left side is unavailable, the AI may set a provisional local zero, but must mark the count as local-context only until higher history is checked."
+                                                                                     ]
+                                                                       },
+                                      "Phase_2B_Main_Connector_Identification":  {
+                                                                                     "source":  "Video_TxpTOT5AQwM_2026-07-13",
+                                                                                     "purpose":  "Find the main corrective connectors that define direction and targets before filling in subwaves.",
+                                                                                     "main_connectors":  "In corrective structures, the major W/X or A/B pivots are the connectors that define whether the next expected leg is Y or C.",
+                                                                                     "rules":  [
+                                                                                                   "Identify the main trend first when possible using higher highs/higher lows or lower lows/lower highs.",
+                                                                                                   "Identify the main connectors next; they often appear around the largest trendline break or the largest same-degree corrective pivot.",
+                                                                                                   "Use equal-leg Fibonacci extension from W to X to project a likely Y target, commonly near 100% of W, with 61.8% as an incomplete/shallower relationship.",
+                                                                                                   "Do not set precise trade entries from the map alone; entries require a separate execution layer and risk plan."
+                                                                                               ]
+                                                                                 }
+                                  },
+    "1_SwingPivotDetectionEngine":  {
+                                        "definitions":  {
+                                                            "swing_high":  "A price bar/candle with a high that is strictly greater than the highs of the preceding and succeeding bars.",
+                                                            "swing_low":  "A price bar/candle with a low that is strictly lower than the lows of the preceding and succeeding bars."
+                                                        },
+                                        "rules":  [
+                                                      "Pivot strength increases with distance, volume reaction, MACD reaction, Fibonacci reaction, and timeframe agreement.",
+                                                      "A swing low must have higher lows before and after it.",
+                                                      "Pivot strength increases with distance, volume reaction, RSI reaction, Fib reaction, and timeframe agreement."
+                                                  ]
+                                    },
+    "2_SwingSelectionEngine":  {
+                                   "rules":  {
+                                                 "noise_filtering":  [
+                                                                         "Ignore pivots smaller than ATR threshold.",
+                                                                         "Detect candidate pivots from price and time before reading MACD, volume, EWO, or Fibonacci evidence.",
+                                                                         "Indicators may rank or confirm a price pivot, but must not create, erase, or preselect the pivot during the blind recount pass."
+                                                                     ],
+                                                 "multi_timeframe_confirmation":  [
+                                                                                      "Weekly pivots override daily pivots.",
+                                                                                      "Lower-timeframe pivots are only used to subdivide higher-timeframe waves."
+                                                                                  ]
+                                             }
+                               },
+    "2A_WaveBoundaryIndicatorAudit":  {
+                                              "purpose":  "Prevent indicator cherry-picking and false Wave 3/Wave 5 divergence claims.",
+                                              "rules":  [
+                                                            "Lock candidate pivots from price before reading RSI, volume, MACD, or EWO.",
+                                                            "Use the same timeframe, data session, price adjustment basis, and wave boundaries for every comparison.",
+                                                            "Compare endpoint-to-endpoint and within-wave-extreme-to-within-wave-extreme separately; never mix those measurement types.",
+                                                            "If Wave 5 RSI is higher than Wave 3 RSI, record No RSI Divergence and remove RSI exhaustion as confirmation.",
+                                                            "Higher Wave 5 RSI is not a classical invalidation; test an extended fifth, nested 1-2 structure, and degree reassignment before accepting the count.",
+                                                            "Indicators rank structurally valid counts but cannot replace Elliott price rules or required internal subdivisions.",
+                                                            "Every indicator claim must report timeframe, pivot dates and prices, and whether endpoint or within-wave extremes were compared."
+                                                        ],
+                                              "NFLX_2026_07_19_correction":  "For the local daily structure beginning at 16.43 on 14 June 2022, 48.50 is a candidate Minor Wave 3 pivot, not the end of Intermediate Wave (1). The first defensible completed Intermediate Wave (1) candidate ends at 63.90 on 8 April 2024, pending lower-timeframe subdivision verification."
+                                          },
+    "3_WaveMeasurementEngine":  {
+                                    "calculations":  {
+                                                         "arithmetic_rule":  "Use for short-term/intraday charts where price variation is less than 50%.",
+                                                         "logarithmic_percentage_rule":  "MANDATORY for macro charts spanning \u003e 2 years or \u003e 100% price growth. Fibs must be calculated based on percentage growth, not raw points. (e.g., Wave 3 percentage growth = Wave 1 percentage growth * 1.618)."
+                                                     },
+                                    "fibonacci_ratios":  {
+                                                             "retracements":  [
+                                                                                  0.236,
+                                                                                  0.382,
+                                                                                  0.5,
+                                                                                  0.618,
+                                                                                  0.786,
+                                                                                  0.886
+                                                                              ],
+                                                             "extensions":  [
+                                                                                1.0,
+                                                                                1.236,
+                                                                                1.382,
+                                                                                1.618,
+                                                                                2.0,
+                                                                                2.236,
+                                                                                2.618,
+                                                                                3.618,
+                                                                                4.236
+                                                                            ],
+                                                             "tolerance_variance_percent":  0.05
+                                                         },
+                                    "fib_rejection_logic":  "Reject extensions \u003e 4.236. If an extension \u003e 4.236 is found, the wave degrees are mismatched. The \u0027Wave 1\u0027 is actually a micro subwave, and the \u0027Wave 3\u0027 is a macro wave. Recalculate anchors."
+                                },
+    "4_DegreeAssignmentEngine":  {
+                                     "assignment_rules":  {
+                                                              "Grand_Supercycle":  "Multi-decade to century trends. Notation: [I], [II], [III], [IV], [V].",
+                                                              "Supercycle":  "Multi-year to multi-decade trends. Notation: ((I)), ((II)), ((III)), ((IV)), ((V)).",
+                                                              "Cycle":  "1 to 3+ year trends. Notation: I, II, III, IV, V.",
+                                                              "Primary":  "Months to years trends. Notation: ((1)), ((2)), ((3)), ((4)), ((5)).",
+                                                              "Intermediate":  "Weeks to months trends. Notation: (1), (2), (3), (4), (5).",
+                                                              "Minor":  "Weeks trends. Notation: 1, 2, 3, 4, 5.",
+                                                              "Minute":  "Days trends. Notation: ((i)), ((ii)), ((iii)), ((iv)), ((v)).",
+                                                              "Minuette":  "Intraday hours trends. Notation: (i), (ii), (iii), (iv), (v)."
+                                                          },
+                                     "timeframe_visibility_guidelines_from_video":  {
+                                                                                        "source":  "Video_TxpTOT5AQwM_2026-07-13",
+                                                                                        "Grand_Supercycle_Supercycle_Cycle":  "Mostly visible on Weekly and Daily charts.",
+                                                                                        "Primary_Intermediate_Minor":  "Mostly visible on Daily and 4H charts.",
+                                                                                        "Minute_Minuette_Subminuette":  "Mostly visible on 4H and 1H charts.",
+                                                                                        "rule":  "These are visibility guidelines, not hard limits. The AI must still obey parent boundaries and actual pivot scale."
+                                                                                    },
+                                     "same_degree_label_rule":  {
+                                                                    "source":  "Video_TxpTOT5AQwM_2026-07-13",
+                                                                    "rules":  [
+                                                                                  "Treat the degree table as a dictionary for reading the chart.",
+                                                                                  "Identify labels of the same degree first before deciding structure.",
+                                                                                  "If two labels share the same degree, they are part of the same cycle unless a higher-degree boundary invalidates that interpretation.",
+                                                                                  "If a label degree is unknown, mark it unknown instead of mixing it with nearby labels."
+                                                                              ]
+                                                                }
+                                 },
+    "5_WaveDecompositionEngine":  {
+                                      "validation_rules":  [
+                                                               "Wave 2 can never retrace 100% of Wave 1.",
+                                                               "Wave 3 can never be the shortest motive wave.",
+                                                               "Wave 4 can never overlap the price territory of Wave 1 (except in diagonals).",
+                                                               "Wave 4 does not pass 50% Fibonacci retracement of Wave 3 (unless a diagonal).",
+                                                               "Do not force a 1-2-3-4-5 impulse label when the movement is overlapping, equal-legged, or internally corrective.",
+                                                               "An impulse must have five-wave subdivisions inside Waves 1, 3, and 5. If W1/W3/W5 internal subdivisions are not five-wave structures, reject the impulse label.",
+                                                               "A corrective trend can keep progressing in repeated three-wave structures; label it WXY or related corrective combinations instead of forcing impulse labels.",
+                                                               "If the chart does not show 5-3-5 internally, do not label the correction as a zigzag ABC."
+                                                           ],
+                                      "impulse_vs_corrective_decision_rules_from_video":  {
+                                                                                              "source":  "Video_TxpTOT5AQwM_2026-07-13",
+                                                                                              "impulse_character":  "Clear, strong directional movement with limited overlap; Waves 1, 3, and 5 subdivide into five waves; Wave 3 is commonly the strongest/longest.",
+                                                                                              "corrective_character":  "Overlapping movement, equal legs, repeated 3-wave advances/declines, and frequent WXY structures.",
+                                                                                              "decision":  "When evidence conflicts, prefer corrective labeling over forced impulse labeling until a valid internal five-wave structure is proven."
+                                                                                          }
+                                  },
+    "7_VolumeAnalysisEngine":  {
+                                   "expected_behavior":  {
+                                                             "Wave_1":  "Volume might increase a bit, but not enough to alert many analysts.",
+                                                             "Wave_2":  "Strict, visible contraction confirming retail profit-taking over distribution. Lower than Wave 1.",
+                                                             "Wave_3":  "Explosive, highest sustained volume of the cycle. Crowd joins the trend.",
+                                                             "Wave_4":  "Choppy, diminishing volume.",
+                                                             "Wave_5":  "Volume expansion on breakout, but critically lower total volume than Wave 3.",
+                                                             "Corrections":  "Spikes on capitulation (Wave C), dries up on trap rallies (Wave B)."
+                                                         },
+                                   "sequence_verification_rules":  {
+                                                                       "data_contract":  {
+                                                                                             "required_group_key":  "sequence_id",
+                                                                                             "required_wave_key":  "wave_label",
+                                                                                             "supported_volume_fields_in_priority_order":  [
+                                                                                                                                               "average_candle_volume",
+                                                                                                                                               "average_volume",
+                                                                                                                                               "total_volume"
+                                                                                                                                           ],
+                                                                                             "price_peak_field":  "end_price",
+                                                                                             "consistency_rule":  "Use one and only one volume metric for all compared waves in a sequence. Never compare total volume for one wave with average volume for another wave.",
+                                                                                             "corporate_action_rule":  "Volumes and prices must be adjusted consistently for splits, symbol conversions, exchange changes, and other corporate actions before verification. If they are not comparable, return Insufficient Data."
+                                                                                         },
+                                                                       "Rule_1_Wave_3_Strength_Check":  {
+                                                                                                            "warning":  "If Volume(Wave 3) \u003c Volume(Wave 1), set Warning: Weak Wave 3.",
+                                                                                                            "warning_lowest":  "If Wave 3 has strictly lower volume than Waves 1 and 5, set Warning: Wave 3 weakest in supporting volume evidence.",
+                                                                                                            "interpretation_boundary":  "Volume can warn or rank but cannot invalidate an otherwise rule-valid Elliott count. The classical hard rule is that Wave 3 cannot be the shortest actionary wave by price movement and must travel beyond Wave 1."
+                                                                                                        },
+                                                                       "Rule_2_Correction_Dry_Up_Check":  {
+                                                                                                              "passed":  "If Volume(Wave 2) \u003c Volume(Wave 1) and Volume(Wave 4) \u003c Volume(Wave 3), set Passed: Healthy Correction unless a higher-priority status applies.",
+                                                                                                              "warning":  "If Volume(Wave 2) \u003e Volume(Wave 1) or Volume(Wave 4) \u003e Volume(Wave 3), set Warning: High selling volume on pullback unless Invalid applies.",
+                                                                                                              "equality_rule":  "Equal volumes neither pass the strict dry-up test nor count as a spike. Record the equality in volume_notes."
+                                                                                                          },
+                                                                       "Rule_3_Wave_5_Exhaustion_Check":  {
+                                                                                                              "valid":  "If EndPrice(Wave 5) \u003e EndPrice(Wave 3) and Volume(Wave 5) \u003c Volume(Wave 3), set Valid: Wave 5 Volume Divergence Confirmed (Reversal Imminent).",
+                                                                                                              "signal_boundary":  "The status text is retained for compatibility with the requested workflow, but volume divergence alone cannot prove reversal timing. Require completed Wave 5 structure, RSI divergence, price confirmation, and invalidation before any execution signal."
+                                                                                                          },
+                                                                       "status_precedence":  [
+                                                                                                 "Invalid",
+                                                                                                 "Valid: Wave 5 Volume Divergence Confirmed (Reversal Imminent)",
+                                                                                                 "Warning: Weak Wave 3",
+                                                                                                 "Warning: High selling volume on pullback",
+                                                                                                 "Passed: Healthy Correction",
+                                                                                                 "Passed: No volume warning detected",
+                                                                                                 "Insufficient Data"
+                                                                                             ],
+                                                                       "active_sequence_rule":  "Evaluate every rule whose required waves are complete. Missing future Waves 4 or 5 must be recorded in volume_notes and prevents a final no-warning pass, but an already-observed warning or invalidation must still be reported."
+                                                                   }
+                               },
+    "8_TrendlineChannelEngine":  {
+                                     "rules":  [
+                                                   "Impulse channel connects Wave 1 and Wave 3, then projects from Wave 2.",
+                                                   "Corrective channel connects A and C, with parallel from B.",
+                                                   "Triangle uses A-C and B-D trendlines."
+                                               ]
+                                 },
+    "9_PatternRankingEngine":  {
+                                   "ranking_weights":  {
+                                                           "elliott_rule_compliance":  0.3,
+                                                           "fibonacci_fit":  0.2,
+                                                           "volume_fit":  0.1,
+                                                           "channel_trendline_fit":  0.1,
+                                                           "multi_timeframe_agreement":  0.1,
+                                                           "simplicity_least_complexity":  0.05,
+                                                           "macd_momentum_fit":  0.15
+                                                       },
+                                   "usage_boundary":  "Ranking weights are only diagnostic/tie-break inputs. They must not override the Strict Verification Gate or create a confidence-score acceptance."
+                               },
+    "10_OutputSchemaTemplate":  {
+                                    "degree":  "",
+                                    "wave_label":  "",
+                                    "start_date":  "",
+                                    "end_date":  "",
+                                    "start_price":  0.0,
+                                    "end_price":  0.0,
+                                    "length_points":  0.0,
+                                    "length_percent":  0.0,
+                                    "fib_relationships":  [
+
+                                                          ],
+                                    "volume_analysis":  {
+
+                                                        },
+                                    "volume_confirmation_status":  "",
+                                    "volume_notes":  "",
+                                    "subwaves":  [
+
+                                                 ],
+                                    "invalidation":  {
+
+                                                     },
+                                    "cumulative_volume":  0.0,
+                                    "wave_ewo_peak":  null,
+                                    "wave_ewo_min":  null,
+                                    "wave_ewo_max":  null,
+                                    "ewo_zero_touch":  null,
+                                    "impulse_status":  "",
+                                    "impulse_notes":  "",
+                                    "leg_1_subwaves":  null,
+                                    "leg_1_ewo_peak":  null,
+                                    "preceding_impulse_ewo_peak":  null,
+                                    "effort_result_ratio":  null,
+                                    "historical_50_effort_result_avg":  null,
+                                    "leg_1_pierced_bollinger_2":  null,
+                                    "leg_1_pierced_keltner":  null,
+                                    "early_correction_label":  "",
+                                    "confidence_score":  null,
+                                    "leg_2_retracement_pct":  null,
+                                    "correction_structure_label":  "",
+                                    "leg_2_forecast":  "",
+                                    "leg_3_forecast":  "",
+                                    "final_leg_label":  ""
+                                },
+    "11_ActiveDatabaseRecords":  [
+                                     {
+                                         "sequence_id":  "NYSE_DELL_PRIMARY_III_INTERMEDIATE_2022_2026",
+                                         "symbol":  "NYSE:DELL",
+                                         "timeframe":  "1M",
+                                         "degree":  "Intermediate",
+                                         "wave_label":  "1",
+                                         "start_date":  "2022-10-03",
+                                         "end_date":  "2024-05-01",
+                                         "start_price":  30.37,
+                                         "end_price":  173.96,
+                                         "total_volume":  2137630000.0,
+                                         "average_candle_volume":  112506842.11,
+                                         "volume_samples":  19,
+                                         "data_source":  "TradingView Table View, NYSE:DELL, monthly",
+                                         "wave_status":  "completed_candidate",
+                                         "volume_confirmation_status":  "Warning: High selling volume on pullback",
+                                         "volume_notes":  "Compared all waves using average_candle_volume. Missing future or unavailable wave rows: 4, 5. Wave 3 volume is not lower than Wave 1 volume. High pullback volume: Wave 2 \u003e Wave 1. Wave 3/5 end_price is missing, so volume divergence was not evaluated.",
+                                         "cumulative_volume":  2137630000.0,
+                                         "wave_ewo_peak":  null,
+                                         "wave_ewo_min":  null,
+                                         "wave_ewo_max":  null,
+                                         "ewo_zero_touch":  null,
+                                         "impulse_status":  "Insufficient Data",
+                                         "impulse_notes":  "Completed five-wave sequence unavailable; missing Waves 3, 4, 5.",
+                                         "early_correction_label":  "",
+                                         "confidence_score":  null,
+                                         "early_correction_notes":  "Classifier requires a completed three-subwave Leg 1.",
+                                         "correction_structure_label":  "Insufficient Data",
+                                         "leg_2_forecast":  "",
+                                         "leg_3_forecast":  "",
+                                         "final_leg_label":  "",
+                                         "correction_forecast_notes":  "Leg 1 subwave count is required."
+                                     },
+                                     {
+                                         "sequence_id":  "NYSE_DELL_PRIMARY_III_INTERMEDIATE_2022_2026",
+                                         "symbol":  "NYSE:DELL",
+                                         "timeframe":  "1M",
+                                         "degree":  "Intermediate",
+                                         "wave_label":  "2",
+                                         "start_date":  "2024-05-01",
+                                         "end_date":  "2025-04-01",
+                                         "start_price":  173.96,
+                                         "end_price":  64.84,
+                                         "total_volume":  2307220000.0,
+                                         "average_candle_volume":  209747272.73,
+                                         "volume_samples":  11,
+                                         "data_source":  "TradingView Table View, NYSE:DELL, monthly",
+                                         "wave_status":  "completed_candidate",
+                                         "volume_confirmation_status":  "Warning: High selling volume on pullback",
+                                         "volume_notes":  "Compared all waves using average_candle_volume. Missing future or unavailable wave rows: 4, 5. Wave 3 volume is not lower than Wave 1 volume. High pullback volume: Wave 2 \u003e Wave 1. Wave 3/5 end_price is missing, so volume divergence was not evaluated.",
+                                         "cumulative_volume":  2307220000.0,
+                                         "wave_ewo_peak":  null,
+                                         "wave_ewo_min":  null,
+                                         "wave_ewo_max":  null,
+                                         "ewo_zero_touch":  null,
+                                         "impulse_status":  "Insufficient Data",
+                                         "impulse_notes":  "Completed five-wave sequence unavailable; missing Waves 3, 4, 5.",
+                                         "early_correction_label":  "",
+                                         "confidence_score":  null,
+                                         "early_correction_notes":  "Classifier requires a completed three-subwave Leg 1.",
+                                         "correction_structure_label":  "Insufficient Data",
+                                         "leg_2_forecast":  "",
+                                         "leg_3_forecast":  "",
+                                         "final_leg_label":  "",
+                                         "correction_forecast_notes":  "Leg 1 subwave count is required."
+                                     },
+                                     {
+                                         "sequence_id":  "NYSE_DELL_PRIMARY_III_INTERMEDIATE_2022_2026",
+                                         "symbol":  "NYSE:DELL",
+                                         "timeframe":  "1M",
+                                         "degree":  "Intermediate",
+                                         "wave_label":  "3",
+                                         "start_date":  "2025-04-01",
+                                         "end_date":  "2026-06-01",
+                                         "start_price":  64.84,
+                                         "end_price":  469.47,
+                                         "total_volume":  2152440000.0,
+                                         "average_candle_volume":  153745714.29,
+                                         "volume_samples":  14,
+                                         "data_source":  "TradingView Table View, NYSE:DELL, monthly",
+                                         "wave_status":  "active_candidate",
+                                         "volume_confirmation_status":  "Warning: High selling volume on pullback",
+                                         "volume_notes":  "Compared all waves using average_candle_volume. Missing future or unavailable wave rows: 4, 5. Wave 3 volume is not lower than Wave 1 volume. High pullback volume: Wave 2 \u003e Wave 1. Wave 3/5 end_price is missing, so volume divergence was not evaluated.",
+                                         "cumulative_volume":  2152440000.0,
+                                         "wave_ewo_peak":  null,
+                                         "wave_ewo_min":  null,
+                                         "wave_ewo_max":  null,
+                                         "ewo_zero_touch":  null,
+                                         "observed_extreme_price":  469.47,
+                                         "observed_extreme_date":  "2026-06-01",
+                                         "analysis_notes":  "Daily and 4-hour validation on 2026-07-14 supports an active Intermediate Wave (3). Minor Wave 1 completed near 166.83, Minor Wave 2 completed as a probable ABC zigzag at 109.88, and Minor Wave 3 remains active. The 469.47 high is classified as probable Minute Wave iii inside Minor Wave 3; Minute Wave iv is active and Minute Wave v, Minor Wave 4, and Minor Wave 5 remain ahead. TradingView regular-session data prints 227.27 for the Minute ii low; 226.64 may reflect a different feed or extended-hours series.",
+                                         "subwaves":  [
+                                                          {
+                                                              "degree":  "Minor",
+                                                              "wave_label":  "1",
+                                                              "start_date":  "2025-04-07",
+                                                              "end_date":  "2025-11-03",
+                                                              "start_price":  64.84,
+                                                              "end_price":  166.83,
+                                                              "wave_status":  "completed_candidate",
+                                                              "structure":  "five-wave impulse",
+                                                              "minute_pivots_submitted":  [
+                                                                                              64.84,
+                                                                                              87.39,
+                                                                                              79.02,
+                                                                                              140.55,
+                                                                                              116.41,
+                                                                                              166.69
+                                                                                          ],
+                                                              "data_note":  "The submitted 166.69 high occurred on 2025-10-29; the adjusted daily series made a marginal higher high of 166.83 on 2025-11-03, which is retained as the strict endpoint pending a lower-timeframe endpoint audit."
+                                                          },
+                                                          {
+                                                              "degree":  "Minor",
+                                                              "wave_label":  "2",
+                                                              "start_date":  "2025-11-03",
+                                                              "end_date":  "2026-01-21",
+                                                              "start_price":  166.83,
+                                                              "end_price":  109.88,
+                                                              "wave_status":  "completed_candidate",
+                                                              "structure":  "probable ABC zigzag",
+                                                              "pivots":  {
+                                                                             "A":  115.69,
+                                                                             "B":  141.28,
+                                                                             "C":  109.88
+                                                                         },
+                                                              "confirmation_notes":  "B retraced approximately 50.04% of A. C measured approximately 0.614 of A and ended near the 0.618 projection at 109.68. Four-hour data supports five-wave candidates in both A and C, with bullish RSI and EWO divergence into C."
+                                                          },
+                                                          {
+                                                              "degree":  "Minor",
+                                                              "wave_label":  "3",
+                                                              "start_date":  "2026-01-21",
+                                                              "end_date":  null,
+                                                              "start_price":  109.88,
+                                                              "end_price":  null,
+                                                              "wave_status":  "active_candidate",
+                                                              "structure":  "active five-wave impulse",
+                                                              "minute_subwaves":  [
+                                                                                      {
+                                                                                          "wave_label":  "i",
+                                                                                          "start_price":  109.88,
+                                                                                          "end_price":  263.99,
+                                                                                          "wave_status":  "completed_candidate",
+                                                                                          "structure":  "probable five-wave impulse"
+                                                                                      },
+                                                                                      {
+                                                                                          "wave_label":  "ii",
+                                                                                          "start_price":  263.99,
+                                                                                          "end_price":  227.27,
+                                                                                          "wave_status":  "completed_candidate",
+                                                                                          "structure":  "probable regular Flat (3-3-5)",
+                                                                                          "data_note":  "Regular-session adjusted data prints 227.27/227.31; 226.64 may come from another feed or extended-hours data."
+                                                                                      },
+                                                                                      {
+                                                                                          "wave_label":  "iii",
+                                                                                          "start_price":  227.27,
+                                                                                          "end_price":  469.47,
+                                                                                          "wave_status":  "completed_candidate",
+                                                                                          "structure":  "probable five-wave impulse with extended Minuette iii"
+                                                                                      },
+                                                                                      {
+                                                                                          "wave_label":  "iv",
+                                                                                          "start_price":  469.47,
+                                                                                          "end_price":  null,
+                                                                                          "wave_status":  "active_candidate",
+                                                                                          "structure":  "Flat candidate",
+                                                                                          "observed_A":  357.07,
+                                                                                          "observed_B":  460.5,
+                                                                                          "B_retracement_pct":  92.02,
+                                                                                          "invalidation_below":  263.99
+                                                                                      },
+                                                                                      {
+                                                                                          "wave_label":  "v",
+                                                                                          "wave_status":  "not_formed"
+                                                                                      }
+                                                                                  ]
+                                                          }
+                                                      ],
+                                         "impulse_status":  "Insufficient Data",
+                                         "impulse_notes":  "Completed five-wave sequence unavailable; missing Waves 3, 4, 5.",
+                                         "early_correction_label":  "",
+                                         "confidence_score":  null,
+                                         "early_correction_notes":  "Classifier requires a completed three-subwave Leg 1.",
+                                         "correction_structure_label":  "Insufficient Data",
+                                         "leg_2_forecast":  "",
+                                         "leg_3_forecast":  "",
+                                         "final_leg_label":  "",
+                                         "correction_forecast_notes":  "Leg 1 subwave count is required."
+                                     }
+                                 ],
+    "12_KnowledgeExpansionLayer":  {
+                                       "Elliott_Wave_Pattern_Library":  {
+                                                                            "Impulse":  {
+                                                                                            "Structure":  "5-3-5-3-5",
+                                                                                            "Rules":  "W2 \u003c 100% of W1. W3 not shortest. W4 does not overlap W1.",
+                                                                                            "Fibonacci_guidelines":  "W3 = 1.618 or 2.618 of W1. W4 = 0.236 or 0.382 of W3. W5 = 0.618 of W1-W3.",
+                                                                                            "Personality":  "W1 rarely obvious. W3 is powerful and unmistakable. W5 driven by universal retail bullishness."
+                                                                                        },
+                                                                            "Ending_Diagonal":  {
+                                                                                                    "Structure":  "3-3-3-3-3",
+                                                                                                    "Rules":  "Occurs in Wave 5 or C. Trendlines converge. W4 MUST overlap W1."
+                                                                                                },
+                                                                            "Zigzag":  {
+                                                                                           "Structure":  "5-3-5",
+                                                                                           "Rules":  "Wave B \u003c 100% of A. Wave C goes beyond A.",
+                                                                                           "Fibonacci_guidelines_from_video":  "C is commonly near 100% of A; B normally remains below/above the start of A in the opposite direction and often retraces around the middle of A.",
+                                                                                           "Anti_mislabel_rule_from_video":  "If the internal structure is not 5-3-5, do not label it as a zigzag ABC."
+                                                                                       },
+                                                                            "Expanded_Flat":  {
+                                                                                                  "Structure":  "3-3-5",
+                                                                                                  "Rules":  "Wave B \u003e 100% of A (Bull Trap). Wave C \u003e 100% of A (Liquidation)."
+                                                                                              },
+                                                                            "Triangle":  {
+                                                                                             "Structure":  "3-3-3-3-3 (A-B-C-D-E)",
+                                                                                             "Rules":  "Cannot occur in Wave 2. Must be Wave 4, B, X, or Y."
+                                                                                         },
+                                                                            "Double_Three_WXY":  {
+                                                                                                     "Source":  "Video_TxpTOT5AQwM_2026-07-13",
+                                                                                                     "Structure":  "3-3-3",
+                                                                                                     "Rules":  "W and Y are corrective structures connected by X. W can internally be zigzag, flat, WXY, or another corrective form. X is a connector/countertrend correction.",
+                                                                                                     "Fibonacci_guidelines":  "Y commonly reaches 100% of W measured from X; 61.8% can be a shallower/incomplete relationship.",
+                                                                                                     "Interpretation":  "If W and X are accepted at the same degree, expect Y in the same direction as W, often breaking beyond W."
+                                                                                                 },
+                                                                            "Flat":  {
+                                                                                         "Source":  "Video_TxpTOT5AQwM_2026-07-13",
+                                                                                         "Structure":  "3-3-5",
+                                                                                         "Rules":  "A is corrective, B is corrective and can exceed the origin of A, C is five waves and usually retests or marginally breaks the end of A.",
+                                                                                         "Personality":  "Sideways/consolidating correction rather than a sharp directional zigzag."
+                                                                                     },
+                                                                            "Corrective_Trend_Sequence":  {
+                                                                                                              "Source":  "Video_TxpTOT5AQwM_2026-07-13",
+                                                                                                              "Structure":  "Repeated 3-wave advances/declines, often WXY nested inside larger WXY.",
+                                                                                                              "Rules":  "A market can trend in corrective sequences, especially when overlapping/equal-leg swings dominate. This is not automatically an impulse.",
+                                                                                                              "Use":  "When repeated equal-leg 3-wave swings persist with overlap, classify the trend as corrective until a clean impulse proves otherwise."
+                                                                                                          }
+                                                                        },
+                                       "Human_Analyst_Notes":  {
+                                                                   "Identifying_Wave_A":  "First violent break of the trendline. RSI drops below 40 instantly. Often 5 waves down.",
+                                                                   "Identifying_Wave_B":  "Low volume, choppy rally. Looks like the trend is resuming but RSI fails to cross 60. A trap.",
+                                                                   "Confirming_Triangles":  "Look for 5 swings. If it breaks out on swing 4, it\u0027s NOT a triangle. Volume must dry up to almost zero before breakout.",
+                                                                   "Using_RSI_Divergence":  "Divergence between W3 and W5 supports termination but is not a classical price-rule requirement. If W5 RSI is higher than W3 RSI, retain the extending-W3 alternate and require stronger structural proof before accepting W5.",
+                                                                   "Degree_Dictionary_First":  "Before reading a chart, identify the wave degree dictionary/notation. Same-degree labels define the cycle; smaller degrees are only subwaves.",
+                                                                   "Do_Not_Force_Impulse":  "If price action is overlapping and legs are roughly equal, reject impulse labeling unless Waves 1, 3, and 5 can be proven internally as five-wave structures.",
+                                                                   "Main_Connectors":  "In corrective structures, W/X or A/B are the main connectors. Once accepted, the expected next leg is Y or C, commonly toward an equal-leg area.",
+                                                                   "Label_From_Top_Down":  "Label the highest timeframe first. Lower timeframes only add subwave detail and must tie back to the parent labels.",
+                                                                   "Elliott_Map_Not_Execution":  "Elliott Wave gives probable path/direction. Entries require a separate trading execution system and risk management."
+                                                               }
+                                   },
+    "13_MultiDegreeValidationEngine":  {
+                                           "Core_Principle":  "A wave cannot be accepted as valid until its internal structure has been validated.",
+                                           "Subwave_Consistency_Rule":  {
+                                                                            "Impulse":  "Engine MUST output the 5 internal subwaves: 1, 2, 3, 4, 5.",
+                                                                            "Zigzag":  "Engine MUST output the 5-3-5 internal subwaves.",
+                                                                            "Flat":  "Engine MUST output the 3-3-5 internal subwaves.",
+                                                                            "Triangle":  "Engine MUST output the A-B-C-D-E internal subwaves."
+                                                                        },
+                                           "Strict_Verification_Gate":  "Reject a count that breaks mandatory Elliott price rules or required internal structure. MACD, normalized EWO, volume, Fibonacci, and duration rank otherwise valid counts; disagreement must be reported rather than converted into false mathematical certainty.",
+                                           "Same_Degree_Consistency_Rule":  {
+                                                                                "source":  "Video_TxpTOT5AQwM_2026-07-13",
+                                                                                "rule":  "A count is invalid if labels of different degrees are interpreted as the same cycle or if same-degree anchors do not tie across Weekly, Daily, 4H, and 1H."
+                                                                            },
+                                           "Top_Down_Tie_Up_Rule":  {
+                                                                        "source":  "Video_TxpTOT5AQwM_2026-07-13",
+                                                                        "rule":  "Daily must be a zoomed-in version of Weekly, 4H must be a zoomed-in version of Daily, and 1H must be a zoomed-in version of 4H. If the lower timeframe creates different anchors, reject or mark Unproven Internal Structure."
+                                                                    }
+                                       },
+    "14_TradeExecutionBoundaryLayer":  {
+                                           "source":  "Video_TxpTOT5AQwM_2026-07-13",
+                                           "principle":  "Elliott Wave analysis is a map of probable path, not a complete trading system.",
+                                           "requirements_before_trade_signal":  [
+                                                                                    "Directional map from Elliott wave degree and structure.",
+                                                                                    "Separate execution trigger such as 3/7/11 swing setup, breakout/retest, or other defined entry model.",
+                                                                                    "Logical invalidation/stop location based on wave structure.",
+                                                                                    "Position sizing and risk management before entry.",
+                                                                                    "Multi-timeframe agreement so the lower timeframe trade is not against the higher timeframe map."
+                                                                                ],
+                                           "prohibition":  "Do not produce a trade entry solely because an Elliott path points up or down."
+                                       },
+    "15_KnowledgeSources":  [
+                                {
+                                    "source_id":  "Video_TxpTOT5AQwM_2026-07-13",
+                                    "title":  "What\u0027s the SECRET to Accurately Labeling ELLIOTT WAVE Charts?",
+                                    "url":  "https://youtu.be/TxpTOT5AQwM",
+                                    "channel":  "Elliott Wave Forecast",
+                                    "duration":  "1:13:56",
+                                    "date_added":  "2026-07-13",
+                                    "status":  "Integrated",
+                                    "integration_summary":  [
+                                                                "Strengthened top-down Elliott wave degree reading.",
+                                                                "Added same-degree-only label interpretation before structure decisions.",
+                                                                "Added anti-forcing rule: do not label an impulse when price action is overlapping/equal-leg corrective movement.",
+                                                                "Added WXY/double-three corrective logic and equal-leg target behavior.",
+                                                                "Added trading-boundary rule: Elliott wave chart is a map, not a standalone trade-entry system."
+                                                            ]
+                                }
+                            ],
+    "16_AdvancedAnalyticalLayers":  {
+                                        "source":  "User-requested analytical upgrade, integrated 2026-07-14",
+                                        "EWO_CalculationLayer":  {
+                                                                     "median_price":  "(High + Low) / 2",
+                                                                     "ewo":  "SMA(5, Median Price) - SMA(35, Median Price)",
+                                                                     "wave_fields":  [
+                                                                                         "cumulative_volume",
+                                                                                         "wave_ewo_peak",
+                                                                                         "wave_ewo_min",
+                                                                                         "wave_ewo_max",
+                                                                                         "ewo_zero_touch"
+                                                                                     ],
+                                                                     "aggregation_rule":  "Only completed waves are aggregated; wave_ewo_peak is max(abs(EWO)) inside inclusive parent dates."
+                                                                 },
+                                        "ImpulseVerificationEngine":  {
+                                                                          "wave_3_strength":  "Wave 3 cumulative volume and abs EWO peak commonly exceed Wave 1. Weakness in either dimension is supporting-evidence warning only and is not a classical invalidation.",
+                                                                          "correction_reset":  "W2 volume \u003c W1, W4 volume \u003c W3, and Wave 4 EWO range must touch/cross zero.",
+                                                                          "wave_5_divergence":  "A new Wave 5 price extreme requires both cumulative volume and abs EWO peak below Wave 3.",
+                                                                          "signal_boundary":  "Reversal Imminent is a compatibility label, not standalone trade timing; require structure, price confirmation, invalidation, and risk controls."
+                                                                      },
+                                        "EarlyLeg1CorrectionClassifier":  {
+                                                                              "trigger":  "leg_1_subwaves == 3",
+                                                                              "tie_rule":  "Wave W wins ties.",
+                                                                              "confidence_score":  "Winning points divided by all awarded points; unavailable tests award no points."
+                                                                          },
+                                        "ForensicCorrectionForecaster":  {
+                                                                             "five_subwaves":  "Zigzag 5-3-5; B 38.2%-50%; C 100%-161.8% of A.",
+                                                                             "three_subwaves_deep_leg_2":  "90%-138.2% selects Flat 3-3-5.",
+                                                                             "three_subwaves_shallow_leg_2":  "Below 90% selects W-X-Y with Y near equality to W.",
+                                                                             "triple_three":  "A second shallow connector on low volume selects W-X-Y-X-Z and final Wave Z."
+                                                                         }
+                                    },
+    "17_BlindRecountCanonicalSelectionEngine":  {
+                                                    "source":  "RKLB blind recount selected by user as canonical method on 2026-07-15",
+                                                    "scope":  "Mandatory default for stocks, commodities, crypto, indices, and other charts before assigning a canonical Elliott hierarchy.",
+                                                    "core_principle":  "Confirmed swings are discovered before Elliott degrees are assigned. A targeted test of preselected pivots can verify that the pivots exist, but cannot prove that their degree labels are correct.",
+                                                    "chronological_process":  [
+                                                                                  "Fetch the maximum reliable history and begin on the highest practical timeframe.",
+                                                                                  "Detect major price pivots blindly from price, time, and volatility without consulting the proposed Elliott labels.",
+                                                                                  "Compress nearby duplicate pivots and identify complete motive-correction-motive blocks before naming degrees.",
+                                                                                  "Generate at least two price-valid high-degree candidate counts whenever ambiguity exists.",
+                                                                                  "Apply mandatory Elliott price rules and reject candidates that fail them.",
+                                                                                  "Open every proposed impulse and correction on lower timeframes to verify its required internal structure.",
+                                                                                  "Compare logarithmic price proportion, duration proportion, alternation, Fibonacci relationships, and parent-child boundary consistency.",
+                                                                                  "Only after structural testing, use MACD, normalized EWO, comparable normalized volume, channels, and volatility as confirmation or contradiction.",
+                                                                                  "Run causal replay separately to test when pivots became knowable. Never treat a causal pivot score as proof of degree assignment.",
+                                                                                  "Promote one count to canonical only when its advantages over the alternates are written explicitly. Preserve every still-price-valid alternate with its invalidation level."
+                                                                              ],
+                                                    "candidate_ranking_order":  [
+                                                                                    "Mandatory Elliott price rules.",
+                                                                                    "Required internal subwave structure.",
+                                                                                    "Clean separation of complete motive and corrective structures.",
+                                                                                    "Logarithmic price and time proportionality at the proposed degree.",
+                                                                                    "Fibonacci relationships and corrective-family fit.",
+                                                                                    "MACD, normalized EWO, normalized/comparable volume, channel, and volatility confirmation.",
+                                                                                    "Parsimony: prefer the count requiring fewer forced subdivisions, truncations, degree jumps, or unexplained overlaps."
+                                                                                ],
+                                                    "indicator_normalization":  {
+                                                                                    "EWO":  "For cross-wave comparisons over large price changes, compare EWO as a percentage of median price as well as raw EWO. Raw EWO alone is scale-biased.",
+                                                                                    "Volume":  "Use average or relative volume on a comparable session, timeframe, and corporate-action basis. Cumulative volume alone is duration-biased.",
+                                                                                    "Bond_yields_and_macro":  "Macro data may corroborate maturity or risk regime but cannot determine Elliott degree or validate a wave by itself."
+                                                                                },
+                                                    "canonical_governance":  {
+                                                                                 "one_canonical_count":  "Each symbol has one explicitly marked canonical hierarchy.",
+                                                                                 "alternate_protection":  "Alternate scripts and reports must write to alternate-named files and are forbidden from overwriting the canonical record.",
+                                                                                 "revision_gate":  "A canonical count may change only after a new blind recount documents what new price evidence invalidated or materially weakened the previous count.",
+                                                                                 "user_selected_preference":  "When the user explicitly selects one price-valid count as the working model, retain it as canonical until invalidation or a later requested blind recount.",
+                                                                                 "live_edge":  "New live lows/highs update the active wave endpoint but do not silently rewrite completed higher-degree waves."
+                                                                             },
+                                                    "required_output":  [
+                                                                            "Data source, history depth, session basis, adjustment basis, and logarithmic/arithmetic mode.",
+                                                                            "Preferred hierarchy from highest defensible degree to the lowest useful active degree.",
+                                                                            "Internal subdivisions for every completed parent used to justify the count.",
+                                                                            "Mandatory-rule results separated from supporting indicator evidence.",
+                                                                            "At least one alternate when degree ambiguity remains, with strengths, weaknesses, confirmation, and invalidation.",
+                                                                            "Current confirmation levels, invalidation levels, and a statement that the wave map is not a standalone trade entry."
+                                                                        ],
+                                                    "uncertainty_rule":  "Confidence in the observed swing structure may be higher than confidence in the exact degree names. Report that distinction explicitly."
+                                                },
+    "18_NestedOneTwoExtensionEngine":  {
+                                           "source":  "User-requested 1-2 nesting upgrade integrated 2026-07-15; aligned with Elliott Wave International extension guidance",
+                                           "purpose":  "Prevent a vertical third-of-a-third advance from being mislabeled as an abnormally extended Wave 5.",
+                                           "trigger":  "Run this engine whenever a proposed Wave 5 is unusually large, terminal divergence is weak or absent, or the chart contains repeated motive advances followed by corrective pullbacks that hold above their corresponding origins.",
+                                           "outside_in_labeling_process":  [
+                                                                               "Identify the largest valid Wave 1 and its corrective Wave 2 without using the later vertical advance to choose the labels.",
+                                                                               "Inside the expected Wave 3, search for a smaller-degree Wave 1 and Wave 2 pair.",
+                                                                               "Repeat recursively while every smaller Wave 1 is motive, every smaller Wave 2 is corrective, and every Wave 2 stays above the origin of its corresponding Wave 1 in a bull sequence.",
+                                                                               "After the final nested Wave 2, classify the accelerating advance as a possible third-of-a-third-of-a-third rather than defaulting to Wave 5.",
+                                                                               "Require the vertical advance itself to subdivide as a valid five-wave impulse before declaring its lower-degree Wave 3 complete.",
+                                                                               "After a nested third wave completes, expect the stack to unwind through corresponding Wave 4 and Wave 5 pairs from the smallest degree outward."
+                                                                           ],
+                                           "mandatory_rules":  [
+                                                                   "Every proposed Wave 1 must subdivide as a motive five or an allowed leading diagonal.",
+                                                                   "Every proposed Wave 2 must be corrective and may not retrace beyond the origin of its corresponding Wave 1.",
+                                                                   "Degree labels must be strictly nested inside their parent dates and price boundaries.",
+                                                                   "The eventual Wave 3 at each degree may not be the shortest actionary wave.",
+                                                                   "A later Wave 4 must not overlap Wave 1 territory at its own degree, except in a valid diagonal.",
+                                                                   "Do not interpret repeated overlapping three-wave movements as nested 1-2s; preserve W-X-Y or other corrective alternates until motive internals are proven."
+                                                               ],
+                                           "confirmation_profile":  {
+                                                                        "price":  "Each successive second-wave low remains above the origin of its same-degree first wave, creating an invalidation ladder.",
+                                                                        "momentum":  "MACD and normalized EWO should generally expand as nested third waves activate; the strongest momentum often occurs in the third of the third rather than at a terminal fifth.",
+                                                                        "volume":  "Comparable normalized volume should expand during third-wave acceleration and contract during nested second-wave pullbacks.",
+                                                                        "geometry":  "Acceleration and increasingly steep channels support nesting; deceleration, channel throw-over, and terminal divergence support a fifth-wave interpretation.",
+                                                                        "fibonacci":  "Wave 2 commonly retraces 38.2%-78.6% of Wave 1. Similar first-wave log amplitudes across degrees can support, but do not prove, nesting."
+                                                                    },
+                                           "extended_fifth_comparison_gate":  [
+                                                                                  "Always compare the nested 1-2 interpretation against the extended-fifth interpretation when a proposed fifth dominates the chart.",
+                                                                                  "Prefer nesting when the supposed earlier Wave 3 is itself a complete smaller impulse followed by a corrective low that stays above its origin and momentum subsequently accelerates.",
+                                                                                  "Prefer an extended fifth when Waves 1 and 3 are comparable, the fourth wave is clearly complete at the same degree, and the final surge shows terminal characteristics or a fifth-within-fifth structure.",
+                                                                                  "If both counts remain price-valid, retain both and state the exact level or future subdivision that separates them."
+                                                                              ],
+                                           "invalidation_ladder":  "Store the origin of every nested Wave 1 and the top of every same-degree Wave 1 relevant to future Wave 4 overlap. A break invalidates only that nesting level first; do not automatically invalidate every higher-degree bullish count.",
+                                           "output_requirement":  "Reports must display nested pairs as an indented hierarchy and list which Wave 4/5 sequences remain ahead at each degree."
+                                       },
+    "19_RecursiveMultiTimeframeEWONesting":  {
+                                                 "source":  "User-provided recursive multi-timeframe EWO nesting addendum",
+                                                 "purpose":  "Require parent-child Elliott validation through isolated lower-timeframe EWO analysis.",
+                                                 "scaling_matrix":  {
+                                                                        "Macro":  "Monthly/Weekly -\u003e Grand Supercycle, Supercycle, Cycle",
+                                                                        "Swing":  "Daily/4H -\u003e Primary, Intermediate, Minor",
+                                                                        "Intraday":  "1H/15M -\u003e Minute, Minuette, Subminuette"
+                                                                    },
+                                                 "workflow":  [
+                                                                  "Establish the parent wave on the highest requested timeframe before assigning child degrees.",
+                                                                  "Isolate the exact parent start and end dates/prices before downshifting.",
+                                                                  "Prefer a next timeframe that shows approximately 100-140 bars for readable indicator sensitivity, but treat this as a sampling heuristic that cannot assign degree or override price form.",
+                                                                  "Run EWO only on the isolated child segment and identify internal Wave 3 peak, Wave 4 zero-line pullback, and Wave 5 divergence.",
+                                                                  "Repeat recursively for deeper degrees while preserving parent boundaries."
+                                                              ],
+                                                 "nesting_formula_check":  "Every completed five-wave child sequence must fit completely inside the exact start/end boundaries of its parent wave.",
+                                                 "conflict_rule":  "If EWO suggests only three swings inside a proposed parent impulse, issue a structural-audit warning and recount the underlying price subdivisions. Reject or relabel the parent only if price form also fails to produce an allowed motive structure.",
+                                                 "validation_boundary":  "EWO is supporting evidence; parent-child price structure and mandatory Elliott rules remain required."
+                                             },
+    "20_ObjectiveScenarioAndRiskGuardrails":  {
+                                                   "source":  {
+                                                                  "title":  "Busting 3 Myths About Elliott Wave - Trading Tutorials for Beginners",
+                                                                  "url":  "https://youtube.com/shorts/OJRJoztH_80",
+                                                                  "channel":  "More Crypto Online",
+                                                                  "date_added":  "2026-07-18"
+                                                              },
+                                                   "core_role":  "Elliott Wave is a framework for analysing market psychology, trend context, and risk across several possible outcomes. It is not a standalone trading system and must not be presented as deterministic prediction.",
+                                                   "visual_count_rejection":  "Never approve a wave count merely because its pivots visually resemble a familiar Elliott pattern. Price rules and required internal structure come first; Fibonacci retracements, extensions, and wave-to-wave relationships must then be measured explicitly.",
+                                                   "scenario_requirements":  [
+                                                                                 "Publish a preferred count and preserve every materially plausible price-valid alternate.",
+                                                                                 "For each scenario, state its confirmation level, invalidation level, expected structural path, and the evidence that would promote or demote it.",
+                                                                                 "Use Elliott Wave to define context and risk boundaries; require a separate execution trigger, stop logic, and position sizing before proposing a trade.",
+                                                                                 "Express uncertainty directly. Confidence in observed pivots may be higher than confidence in exact wave degree or corrective-family labels."
+                                                                             ],
+                                                   "fibonacci_objectivity_gate":  {
+                                                                                       "impulses":  "Measure Wave 3 and Wave 5 extensions against Wave 1 and the prior net advance; compare all valid relationships instead of forcing one textbook ratio.",
+                                                                                       "corrections":  "Measure retracement depth and equality or extension relationships among A-B-C or W-X-Y legs before selecting the corrective family.",
+                                                                                       "decision_rule":  "Fibonacci supports and ranks price-valid structures but cannot rescue a count that violates mandatory Elliott rules or fails lower-timeframe subdivision."
+                                                                                   },
+                                                   "integration_note":  "This source reinforces the existing TradeExecutionBoundaryLayer and canonical alternate-count governance. The newly explicit addition is the prohibition on unaided visual counting and the mandatory scenario-by-scenario Fibonacci objectivity gate."
+                                               },
+    "21_FrostPrechterClassicalReference":  {
+                                                  "source":  {
+                                                                 "title":  "Elliott Wave Principle / Comprehensive Course",
+                                                                 "authors":  "A.J. Frost and Robert Prechter",
+                                                                 "url":  "https://www.investmenttheory.org/uploads/3/4/8/2/34825752/elliott-wave-principle.pdf",
+                                                                 "pages":  118,
+                                                                 "date_integrated":  "2026-07-18",
+                                                                 "role":  "Primary classical reference for rule-versus-guideline classification"
+                                                             },
+                                                  "precedence":  "Mandatory price rules and required wave form override every indicator, duration table, Fibonacci target, channel, personality observation, or confidence score.",
+                                                  "mandatory_motive_rules":  [
+                                                                                 "Wave 2 may not retrace beyond the origin of Wave 1.",
+                                                                                 "Wave 3 must travel beyond the end of Wave 1.",
+                                                                                 "Wave 3 may not be the shortest of actionary Waves 1, 3, and 5 when compared in percentage terms for large waves and normally also arithmetic terms for smaller waves.",
+                                                                                 "Wave 4 may not retrace beyond the end of Wave 3.",
+                                                                                 "In a cash-market impulse, Wave 4 may not enter Wave 1 price territory.",
+                                                                                 "Impulse actionary subwaves 1, 3, and 5 are motive, and Wave 3 is specifically an impulse."
+                                                                             ],
+                                                  "pattern_dictionary":  {
+                                                                             "impulse":  "5-3-5-3-5; no Wave 1/4 overlap.",
+                                                                             "ending_diagonal":  "3-3-3-3-3 wedge, mainly in Wave 5 or C; Wave 1/4 overlap is expected; terminal structure.",
+                                                                             "leading_diagonal":  "5-3-5-3-5 wedge under this reference, only in Wave 1 or A; distinguish from nested 1-2 by slowing fifth-wave speed versus accelerating nested thirds.",
+                                                                             "zigzag":  "A-B-C = 5-3-5; sharp; common in Wave 2; C commonly equals A and may be 0.618 or 1.618 times A.",
+                                                                             "flat":  "A-B-C = 3-3-5; regular, expanded, or rare running variation.",
+                                                                             "triangle":  "A-B-C-D-E = 3-3-3-3-3; contracting or expanding; volume and volatility usually contract; occurs in Wave 4, B, X, or final Y position, not Wave 2.",
+                                                                             "double_or_triple_zigzag":  "W-X-Y or W-X-Y-X-Z; directional correction used when the first zigzag does not achieve adequate retracement.",
+                                                                             "combination":  "W-X-Y or W-X-Y-X-Z; sideways duration extension; no more than one zigzag and one triangle, with a triangle only final."
+                                                                         },
+                                                  "correction_rules":  [
+                                                                           "A complete correction is never a five; an initial five against the larger trend is only part of the correction.",
+                                                                           "Every B, D, and X wave is corrective.",
+                                                                           "Use orthodox pattern endpoints rather than intra-pattern extremes for labeling and ratio measurement.",
+                                                                           "Running flats are rare and must never be selected prematurely; their internal subdivisions must be proven."
+                                                                       ],
+                                                  "guidelines_not_rules":  {
+                                                                                 "alternation":  "Expect Waves 2 and 4 to differ in sharp/sideways form, complexity, depth, or duration, but do not invalidate a count solely for weak alternation.",
+                                                                                 "extension":  "Most impulses extend one actionary wave. Stocks most often extend Wave 3; fifth-wave extensions are less common in stocks and more characteristic of commodity bull markets.",
+                                                                                 "equality":  "The two non-extended actionary waves tend toward equality in time and magnitude; 0.618 is the next common relation.",
+                                                                                 "retracement":  "Sharp corrections often retrace 50%-61.8%; sideways corrections often retrace about 38.2%; these are tendencies only.",
+                                                                                 "prior_fourth":  "Corrections, especially fourth waves, often terminate in the territory of the prior fourth wave of one lesser degree.",
+                                                                                 "channeling":  "Use parallel channels for targets and structure. Draw 1-3 with a parallel through 2 for Wave 4, then refine with 2-4 and a parallel through 1 for Wave 5.",
+                                                                                 "volume":  "Volume verifies and can project extensions but does not invalidate price-valid form. Below Primary degree, normal fifth-wave volume often trails Wave 3; equal/higher volume can indicate a fifth extension. At Primary degree and above, fifth-wave volume may naturally exceed Wave 3.",
+                                                                                 "momentum_indicators":  "MACD, EWO, and RSI are modern supporting tools, not classical Elliott rules. RSI remains disabled by default in the legacy profile and is optional soft evidence in the adaptive elliott_full profile."
+                                                                             },
+                                                  "degree_and_time":  {
+                                                                           "rule":  "Wave degree is not based on fixed price or time lengths. It is determined by form, relative size, and position among component, adjacent, and encompassing waves.",
+                                                                           "duration_tables":  "User-provided duration ranges are retained only as soft priors and anomaly flags; they cannot assign or invalidate degree.",
+                                                                           "time_fibonacci":  "Time ratios are less common and less reliable than price amplitude relationships."
+                                                                       },
+                                                  "scale_policy":  {
+                                                                       "rule":  "Maintain both arithmetic and semilogarithmic charts.",
+                                                                       "large_degree":  "Above Intermediate degree, compare price relationships primarily in percentage terms.",
+                                                                       "small_degree":  "At Intermediate degree and below, arithmetic equality is often usable because percentage and point lengths are closer.",
+                                                                       "channel_selection":  "If a parallel channel is incoherent on one scale, inspect the other. Report which scale supports the channel and preserve conflicts."
+                                                                   },
+                                                  "analysis_governance":  [
+                                                                               "Wave form analysis precedes Fibonacci ratio analysis.",
+                                                                               "Indicators and guidelines rank only counts that already satisfy mandatory rules and allowed internal form.",
+                                                                               "Preserve preferred and alternate rule-valid counts with exact confirmation and invalidation levels.",
+                                                                               "Report structural confidence separately from exact-degree confidence."
+                                                                           ]
+                                              },
+    "22_AdaptivePreFreezeRecount":  {
+                                               "source":  "Approved adaptive Elliott recount implementation",
+                                               "purpose":  "Build independent price-first Primary and Alternative hypotheses, acquire only structurally useful native resolutions, and prove subdivisions before the authoritative technical freeze.",
+                                               "activation":  "Opt-in adaptive-recount workflow; the legacy analysis path remains available.",
+                                               "timeframe_policy":  {
+                                                                        "rule":  "Select canonical timeframes dynamically from the connected provider's immutable advertised capabilities. Timeframe is evidence granularity, not Elliott degree.",
+                                                                        "sampling_target":  "Prefer approximately 100-140 useful native bars when practical; this is a view-selection heuristic, never a hard Elliott rule.",
+                                                                        "unsupported_data":  "Return unsupported, not_covered, budget_exhausted, or unresolved explicitly. Missing data is never evidence against a count.",
+                                                                        "native_boundary":  "Exact pivots require native completed candles. Derived evidence must remain identified as derived and follow its separately approved policy."
+                                                                    },
+                                               "blind_generation":  [
+                                                                         "Generate Primary and Alternative in separate calls from the same fresh price evidence and generic rules.",
+                                                                         "Do not expose either candidate to its peer before both are frozen.",
+                                                                         "Exclude prior symbol counts, reports, runs, resolutions, accepted cases, forecasts, outcomes, lessons, targets, invalidations, overlays, fundamentals, news and events.",
+                                                                         "Reject an Alternative that is only a semantic duplicate with renamed identifiers."
+                                                                     ],
+                                               "recursive_proof":  [
+                                                                      "Use typed structural questions and bounded request, bar, graph, pivot, node, depth and terminal-degree policies.",
+                                                                      "Generate children one degree at a time from a deterministic native pivot catalog.",
+                                                                      "Only deterministic subdivision validation may return verified, unproven, not_covered or inconsistent.",
+                                                                      "An active parent cannot be verified as a completed wave, and model prose cannot override proof status.",
+                                                                      "Preserve structurally valid unresolved alternatives and reject each hypothesis independently."
+                                                                  ],
+                                               "indicator_profile":  {
+                                                                         "name":  "elliott_full",
+                                                                         "features":  [
+                                                                                          "RSI",
+                                                                                          "volume",
+                                                                                          "EWO",
+                                                                                          "MACD",
+                                                                                          "volatility",
+                                                                                          "scale diagnostics",
+                                                                                          "Fibonacci",
+                                                                                          "channels",
+                                                                                          "duration"
+                                                                                      ],
+                                                                         "governance":  "Price boundaries and allowed Elliott form come first. Indicator evidence may support, remain neutral, contradict, be unavailable or be incomparable; it cannot create pivots, choose a family or independently invalidate a price-valid count.",
+                                                                         "compatibility":  "RSI remains optional at the lower-level API and legacy feature defaults remain unchanged."
+                                                                     },
+                                               "data_governance":  [
+                                                                       "Require provider, feed, exchange, session, timezone, adjustment, price basis, timeframe and cutoff provenance.",
+                                                                       "Exclude incomplete and post-cutoff candles.",
+                                                                       "Do not silently mix providers or compare volume across changed feeds or timeframes.",
+                                                                       "Store requests, bundles, candidates and proof traces as immutable canonical-hashed artifacts."
+                                                                   ],
+                                               "tradingview_boundary":  "Codex-controlled MCP ingestion is permitted only when the real TradingView tool supplies provenance-complete raw OHLCV. The currently audited mcp__codex_apps__tradingcursor_request_analysis tool lacks the required raw-candle, completion, session, adjustment and pagination contract, so the workflow must report insufficient capability rather than fabricate access.",
+                                               "freeze_boundary":  "After all surviving branches have explicit proof or bounded-stop states, run the normal final comparison and existing resolve_degrees() deterministic validation. Only that stored result is authoritative; Market Scenario and Phase 11 remain downstream.",
+                                               "specification":  "docs/adaptive_elliott_recount_spec.md"
+                                           }
+}

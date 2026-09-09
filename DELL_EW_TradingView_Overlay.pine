@@ -1,0 +1,127 @@
+//@version=6
+indicator("DELL EW Multi-Degree Map - 2026-07-14", overlay=true, max_lines_count=250, max_labels_count=250)
+
+primaryColor = color.rgb(24, 70, 125)
+intermediateColor = color.rgb(210, 107, 25)
+minorColor = color.rgb(0, 125, 115)
+minuteColor = color.rgb(112, 76, 182)
+alternateColor = color.rgb(170, 45, 45)
+
+var line[] ewLines = array.new_line()
+var label[] ewLabels = array.new_label()
+
+f_t(y, m, d) => timestamp("America/New_York", y, m, d, 12, 0)
+
+f_line(t1, p1, t2, p2, c, w, s) =>
+    array.push(ewLines, line.new(t1, p1, t2, p2, xloc=xloc.bar_time, color=c, width=w, style=s))
+
+f_label(t, p, txt, c, above) =>
+    st = above ? label.style_label_down : label.style_label_up
+    array.push(ewLabels, label.new(t, p, txt, xloc=xloc.bar_time, style=st, color=c, textcolor=color.white, size=size.tiny))
+
+f_path(t0, p0, t1, p1, t2, p2, t3, p3, t4, p4, t5, p5, c, w, s) =>
+    f_line(t0, p0, t1, p1, c, w, s)
+    f_line(t1, p1, t2, p2, c, w, s)
+    f_line(t2, p2, t3, p3, c, w, s)
+    f_line(t3, p3, t4, p4, c, w, s)
+    f_line(t4, p4, t5, p5, c, w, s)
+
+if barstate.islast and array.size(ewLines) == 0
+    // Cycle / Primary map. The 2018-2020 move is intentionally left unlabeled.
+    f_line(f_t(2020, 3, 23), 11.76, f_t(2022, 2, 7), 56.00, primaryColor, 4, line.style_solid)
+    f_line(f_t(2022, 2, 7), 56.00, f_t(2022, 10, 10), 30.37, primaryColor, 4, line.style_solid)
+    f_line(f_t(2022, 10, 10), 30.37, f_t(2026, 6, 1), 469.47, primaryColor, 4, line.style_solid)
+    f_label(f_t(2020, 3, 23), 11.76, "Cycle I start", primaryColor, false)
+    f_label(f_t(2022, 2, 7), 56.00, "Primary 1", primaryColor, true)
+    f_label(f_t(2022, 10, 10), 30.37, "Primary 2", primaryColor, false)
+    f_label(f_t(2026, 6, 1), 469.47, "Primary 3 active", primaryColor, true)
+
+    // Primary 1: probable Intermediate five-wave impulse.
+    f_path(f_t(2020, 3, 23), 11.76, f_t(2020, 8, 3), 31.17, f_t(2020, 10, 1), 27.14, f_t(2021, 6, 1), 48.22, f_t(2021, 7, 19), 41.75, f_t(2022, 2, 7), 56.00, intermediateColor, 2, line.style_solid)
+    f_label(f_t(2020, 8, 3), 31.17, "(1)", intermediateColor, true)
+    f_label(f_t(2020, 10, 1), 27.14, "(2)", intermediateColor, false)
+    f_label(f_t(2021, 6, 1), 48.22, "(3)", intermediateColor, true)
+    f_label(f_t(2021, 7, 19), 41.75, "(4)", intermediateColor, false)
+    f_label(f_t(2022, 2, 7), 56.00, "(5)", intermediateColor, true)
+
+    // Primary 2: probable ABC zigzag; W-X-Y remains the alternate if A proves to be a three.
+    f_line(f_t(2022, 2, 7), 56.00, f_t(2022, 5, 9), 35.12, alternateColor, 2, line.style_dashed)
+    f_line(f_t(2022, 5, 9), 35.12, f_t(2022, 8, 15), 47.42, alternateColor, 2, line.style_dashed)
+    f_line(f_t(2022, 8, 15), 47.42, f_t(2022, 10, 10), 30.37, alternateColor, 2, line.style_dashed)
+    f_label(f_t(2022, 5, 9), 35.12, "A / W", alternateColor, false)
+    f_label(f_t(2022, 8, 15), 47.42, "B / X", alternateColor, true)
+    f_label(f_t(2022, 10, 10), 30.37, "C / Y", alternateColor, false)
+
+    // Primary 3: Intermediate structure.
+    f_line(f_t(2022, 10, 10), 30.37, f_t(2024, 5, 20), 173.96, intermediateColor, 3, line.style_solid)
+    f_line(f_t(2024, 5, 20), 173.96, f_t(2025, 4, 7), 64.84, intermediateColor, 3, line.style_solid)
+    f_line(f_t(2025, 4, 7), 64.84, f_t(2026, 6, 1), 469.47, intermediateColor, 3, line.style_solid)
+    f_label(f_t(2024, 5, 20), 173.96, "Intermediate (1)", intermediateColor, true)
+    f_label(f_t(2025, 4, 7), 64.84, "Intermediate (2)", intermediateColor, false)
+    f_label(f_t(2026, 6, 1), 469.47, "Intermediate (3) active", intermediateColor, true)
+
+    // Intermediate (1): Minor impulse candidate.
+    f_path(f_t(2022, 10, 10), 30.37, f_t(2023, 10, 9), 69.51, f_t(2023, 10, 30), 61.34, f_t(2024, 3, 4), 131.30, f_t(2024, 4, 15), 110.22, f_t(2024, 5, 20), 173.96, minorColor, 2, line.style_solid)
+    f_label(f_t(2023, 10, 9), 69.51, "Minor 1", minorColor, true)
+    f_label(f_t(2023, 10, 30), 61.34, "Minor 2", minorColor, false)
+    f_label(f_t(2024, 3, 4), 131.30, "Minor 3", minorColor, true)
+    f_label(f_t(2024, 4, 15), 110.22, "Minor 4", minorColor, false)
+    f_label(f_t(2024, 5, 20), 173.96, "Minor 5", minorColor, true)
+
+    // Intermediate (2): probable regular zigzag.
+    f_line(f_t(2024, 5, 20), 173.96, f_t(2024, 8, 5), 84.44, minorColor, 2, line.style_dashed)
+    f_line(f_t(2024, 8, 5), 84.44, f_t(2024, 11, 25), 143.95, minorColor, 2, line.style_dashed)
+    f_line(f_t(2024, 11, 25), 143.95, f_t(2025, 4, 7), 64.84, minorColor, 2, line.style_dashed)
+    f_label(f_t(2024, 8, 5), 84.44, "Minor A", minorColor, false)
+    f_label(f_t(2024, 11, 25), 143.95, "Minor B", minorColor, true)
+    f_label(f_t(2025, 4, 7), 64.84, "Minor C", minorColor, false)
+
+    // Intermediate (3): Minor 1-2-3 complete candidates; Minor 4 active.
+    f_line(f_t(2025, 4, 7), 64.84, f_t(2025, 11, 3), 166.83, minorColor, 3, line.style_solid)
+    f_line(f_t(2025, 11, 3), 166.83, f_t(2026, 2, 12), 109.88, minorColor, 3, line.style_solid)
+    f_line(f_t(2026, 2, 12), 109.88, f_t(2026, 6, 1), 469.47, minorColor, 3, line.style_solid)
+    f_line(f_t(2026, 6, 1), 469.47, f_t(2026, 7, 13), 427.11, minorColor, 3, line.style_dashed)
+    f_label(f_t(2025, 11, 3), 166.83, "Minor 1", minorColor, true)
+    f_label(f_t(2026, 2, 12), 109.88, "Minor 2", minorColor, false)
+    f_label(f_t(2026, 6, 1), 469.47, "Minor 3", minorColor, true)
+    f_label(f_t(2026, 7, 13), 427.11, "Minor 4 active", minorColor, false)
+
+    // Minute internals of Minor 1.
+    f_path(f_t(2025, 4, 7), 64.84, f_t(2025, 5, 12), 113.35, f_t(2025, 6, 2), 104.79, f_t(2025, 8, 11), 140.55, f_t(2025, 9, 8), 116.41, f_t(2025, 11, 3), 166.83, minuteColor, 1, line.style_solid)
+    f_label(f_t(2025, 5, 12), 113.35, "i", minuteColor, true)
+    f_label(f_t(2025, 6, 2), 104.79, "ii", minuteColor, false)
+    f_label(f_t(2025, 8, 11), 140.55, "iii", minuteColor, true)
+    f_label(f_t(2025, 9, 8), 116.41, "iv", minuteColor, false)
+    f_label(f_t(2025, 11, 3), 166.83, "v", minuteColor, true)
+
+    // Minute ABC of Minor 2.
+    f_line(f_t(2025, 11, 3), 166.83, f_t(2025, 12, 8), 115.88, minuteColor, 1, line.style_dashed)
+    f_line(f_t(2025, 12, 8), 115.88, f_t(2026, 1, 12), 140.08, minuteColor, 1, line.style_dashed)
+    f_line(f_t(2026, 1, 12), 140.08, f_t(2026, 2, 12), 109.88, minuteColor, 1, line.style_dashed)
+    f_label(f_t(2025, 12, 8), 115.88, "A", minuteColor, false)
+    f_label(f_t(2026, 1, 12), 140.08, "B", minuteColor, true)
+    f_label(f_t(2026, 2, 12), 109.88, "C", minuteColor, false)
+
+    // Minute internals of Minor 3.
+    f_path(f_t(2026, 2, 12), 109.88, f_t(2026, 3, 9), 184.29, f_t(2026, 3, 23), 154.89, f_t(2026, 5, 4), 263.99, f_t(2026, 5, 11), 227.27, f_t(2026, 6, 1), 469.47, minuteColor, 1, line.style_solid)
+    f_label(f_t(2026, 3, 9), 184.29, "i", minuteColor, true)
+    f_label(f_t(2026, 3, 23), 154.89, "ii", minuteColor, false)
+    f_label(f_t(2026, 5, 4), 263.99, "iii", minuteColor, true)
+    f_label(f_t(2026, 5, 11), 227.27, "iv", minuteColor, false)
+    f_label(f_t(2026, 6, 1), 469.47, "v", minuteColor, true)
+
+    // Active Minor 4: conditional Flat 3-3-5 map.
+    f_line(f_t(2026, 6, 1), 469.47, f_t(2026, 6, 17), 357.07, alternateColor, 2, line.style_dashed)
+    f_line(f_t(2026, 6, 17), 357.07, f_t(2026, 7, 6), 460.50, alternateColor, 2, line.style_dashed)
+    f_line(f_t(2026, 7, 6), 460.50, f_t(2026, 7, 13), 427.11, alternateColor, 2, line.style_dotted)
+    f_label(f_t(2026, 6, 17), 357.07, "Minute A", alternateColor, false)
+    f_label(f_t(2026, 7, 6), 460.50, "Minute B (~92%)", alternateColor, true)
+    f_label(f_t(2026, 7, 13), 427.11, "Minute C? unconfirmed", alternateColor, false)
+
+    // Conditional support references for the active correction.
+    line.new(f_t(2026, 6, 1), 384.60, f_t(2026, 9, 1), 384.60, xloc=xloc.bar_time, color=color.new(alternateColor, 35), style=line.style_dotted)
+    line.new(f_t(2026, 6, 1), 348.10, f_t(2026, 9, 1), 348.10, xloc=xloc.bar_time, color=color.new(alternateColor, 20), style=line.style_dashed)
+    line.new(f_t(2026, 6, 1), 332.10, f_t(2026, 9, 1), 332.10, xloc=xloc.bar_time, color=color.new(alternateColor, 35), style=line.style_dotted)
+    f_label(f_t(2026, 8, 25), 384.60, "23.6% support", alternateColor, true)
+    f_label(f_t(2026, 8, 25), 348.10, "C=A objective", alternateColor, true)
+    f_label(f_t(2026, 8, 25), 332.10, "38.2% support", alternateColor, true)

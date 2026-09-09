@@ -1,0 +1,9 @@
+*
+!Dockerfile
+!railway.toml
+!elliott_ai/
+!elliott_ai/**
+!AI_BRAIN_MASTER_RULES.json
+!AI_BRAIN_CURRENT.md
+!.elliott_ai/
+!.elliott_ai/elliott_ai.sqlite3

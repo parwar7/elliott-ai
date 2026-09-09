@@ -1,0 +1,57 @@
+//@version=6
+indicator("MU Complete Elliott Wave Labels 2026-07-15",overlay=true,max_labels_count=150)
+sc=input.bool(true,"Supercycle")
+c=input.bool(true,"Cycle")
+p=input.bool(true,"Primary")
+i=input.bool(true,"Intermediate")
+m=input.bool(true,"Minor")
+u=input.bool(true,"Minute")
+s=input.bool(true,"Minute 3 internals")
+a=input.bool(true,"Active Minute 4 internals")
+SC=color.rgb(90,45,155),C=color.rgb(35,105,125),P=color.rgb(30,90,210)
+I=color.rgb(230,120,20),M=color.rgb(20,150,90)
+U=color.rgb(190,45,160),S=color.rgb(20,145,175),A=color.rgb(210,55,55)
+t(y,mo,d,h=0)=>timestamp("GMT+0",y,mo,d,h,0)
+draw(int[] x,float[] y,string[] z,color col,int unused)=>
+    for n=0 to array.size(y)-2
+        label.new(array.get(x,n+1),array.get(y,n+1),array.get(z,n),xloc=xloc.bar_time,yloc=yloc.price,style=n%2==0?label.style_label_down:label.style_label_up,color=col,textcolor=color.white,size=size.small)
+mark(int x,float y,string txt,color col,bool high,float offsetPct)=>
+    label.new(x,y*(1+offsetPct/100),txt,xloc=xloc.bar_time,yloc=yloc.price,style=high?label.style_label_down:label.style_label_up,color=col,textcolor=color.white,size=size.small)
+var bool done=false
+if barstate.islast and not done
+    done:=true
+    if sc
+        draw(array.from(t(1986,12,1),t(1988,6,1),t(1990,11,1),t(1995,9,1),t(1996,7,1),t(2000,7,3)),array.from(0.3232,2.49,0.6463,46.04,8.11,95.08),array.from("SC I.(1)","SC I.(2)","SC I.(3)","SC I.(4)","Supercycle I"),SC,5)
+        mark(t(2003,2,3),6.44,"SC II.A",SC,false,0)
+        mark(t(2006,9,1),18.19,"SC II.B",SC,true,0)
+        mark(t(2008,11,3),1.55,"Supercycle II",SC,false,0)
+        mark(t(2022,1,3),96.24,"SC III: Cycle I",color.new(SC,20),true,8)
+        mark(t(2022,9,1),47.52,"SC III: Cycle II",color.new(SC,20),false,-10)
+        mark(t(2026,7,15),873.63,"Supercycle III active",color.new(SC,20),false,-15)
+    if c
+        draw(array.from(t(2008,11,3),t(2011,2,1),t(2012,10,1),t(2014,12,1),t(2016,1,4),t(2022,1,3)),array.from(1.55,11.65,5.03,35.68,9.08,96.24),array.from("Cycle I.(1)","Cycle I.(2)","Cycle I.(3)","Cycle I.(4)","Cycle I.(5)"),C,4)
+        mark(t(2022,9,1),47.52,"Cycle II",color.new(C,15),false,-3)
+        mark(t(2026,7,15),873.63,"Cycle III active",color.new(C,15),false,-10)
+    if p
+        draw(array.from(t(2022,9,19),t(2024,6,18),t(2025,4,7)),array.from(47.52,156.41,61.38),array.from("Primary 1","Primary 2"),P,4)
+        mark(t(2026,6,25),1254.81,"Primary 3 active",P,true,20)
+    if i
+        draw(array.from(t(2025,4,7),t(2025,6,26),t(2025,8,1)),array.from(61.38,129.52,103.21),array.from("(1)","(2)"),I,3)
+        mark(t(2026,6,25),1254.81,"(3) active",I,true,14)
+    if m
+        draw(array.from(t(2025,8,1),t(2025,11,17),t(2025,11,21)),array.from(103.21,260.33,192.40),array.from("1","2"),M,3)
+        mark(t(2026,6,25),1254.81,"3 active",M,true,9)
+    if u
+        draw(array.from(t(2025,11,21),t(2026,1,30),t(2026,3,31)),array.from(192.40,455.24,311.44),array.from("i","ii"),U,2)
+        mark(t(2026,6,25),1254.81,"iii",U,true,4)
+        mark(t(2026,7,15),873.63,"iv active",U,false,-4)
+    if s
+        draw(array.from(t(2026,3,31),t(2026,5,11),t(2026,5,19),t(2026,6,3),t(2026,6,9)),array.from(311.44,818.54,652.11,1089.12,854.22),array.from("[i]","[ii]","[iii]","[iv]"),S,2)
+        mark(t(2026,6,25),1254.81,"[v]",S,true,0)
+    if a
+        mark(t(2026,6,26,12),1119.63,"A.i",A,false,0)
+        mark(t(2026,6,26,14),1198.42,"A.ii",A,true,0)
+        mark(t(2026,7,8,8),875.01,"A.iii",A,false,0)
+        mark(t(2026,7,9,12),1035.50,"A.iv",A,true,0)
+        mark(t(2026,7,15,16),873.63,"A.v?",A,false,-20)
+alertcondition(close<455.24,"Nested count invalidated","MU below 455.24 overlaps Minute 1 inside Minor 3")

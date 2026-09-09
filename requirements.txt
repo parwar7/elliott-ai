@@ -1,0 +1,2 @@
+# Windows does not ship the IANA timezone database used by ZoneInfo.
+tzdata==2026.3; platform_system == "Windows"

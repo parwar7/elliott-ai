@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Elliott chart report</title><style>
+*{box-sizing:border-box;letter-spacing:0}body{margin:0;background:#f5f6f8;color:#202830;font:14px system-ui,sans-serif}header{padding:22px 26px 14px;background:white;border-bottom:1px solid #dce0e5}h1{font-size:25px;margin:0 0 8px}p{line-height:1.5;margin:6px 0}.meta{color:#5c6571;font-size:12px}nav{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:12px 26px;background:white;border-bottom:1px solid #dce0e5}label{display:flex;gap:6px;align-items:center}select,button{font:inherit;padding:6px;border:1px solid #b8c0ca;border-radius:4px;background:white;color:#202830}button{cursor:pointer}main{display:grid;grid-template-columns:minmax(0,1fr) 285px}#chart{height:760px;min-width:0;background:white}aside{padding:20px;border-left:1px solid #dce0e5;background:white;overflow-wrap:anywhere}h2{font-size:15px;margin:0 0 12px}.note{border-bottom:1px solid #e4e7eb;padding-bottom:12px;margin-bottom:14px}#detail{color:#174f78}footer{padding:16px 26px;overflow-wrap:anywhere}summary{cursor:pointer}#source{white-space:pre-wrap;font-size:11px}#coverage{padding:8px 26px;background:#edf1f4;font-size:12px}#tooltip{min-height:40px;padding:8px 26px;background:white;font-variant-numeric:tabular-nums}@media(max-width:800px){header,nav,footer{padding:14px}main{grid-template-columns:1fr}#chart{height:650px}aside{border-left:0;border-top:1px solid #ddd}nav{gap:8px}h1{font-size:22px}}
+</style></head><body>
+<header><h1 id="title"></h1><p id="subtitle"></p><div class="meta" id="meta"></div></header>
+<nav aria-label="Chart controls"><label>Timeframe <select id="tf"></select></label><label>Count <select id="role"><option value="both">Both</option><option value="primary">Primary</option><option value="alternative">Alternative</option></select></label><label>Degree <select id="degree"><option>All</option></select></label><label>Scale <select id="scale"><option value="linear">Arithmetic</option><option value="log">Logarithmic</option></select></label><label>Momentum <select id="indicator"><option value="rsi14">RSI 14</option><option value="ewo">EWO</option><option value="macd">MACD</option></select></label><label><input id="levels" type="checkbox" checked>Levels</label><button id="reset" title="Reset chart view" aria-label="Reset chart view">&#8634;</button></nav>
+<div id="coverage"></div><div id="tooltip">&nbsp;</div><main><div id="chart"></div><aside><h2>Scenario notes</h2><div id="notes"></div><h2>Selected wave</h2><p id="detail">No wave selected.</p></aside></main><footer><details><summary>Source and annotation provenance</summary><pre id="source"></pre></details></footer>
+<script>__PLOTLY__</script><script type="application/json" id="payload">__PAYLOAD__</script><script>
+'use strict';
+const D=JSON.parse(document.getElementById('payload').textContent), $=id=>document.getElementById(id), chart=$('chart');
+$('title').textContent=D.plan.title;
+$('subtitle').textContent='Saved market snapshot | Wave labels remain provisional';
+$('meta').textContent=D.plan.source.provider+' | '+D.plan.source.session+' session | Split-adjusted, dividend-unadjusted | Captured '+D.plan.source.cutoff;
+Object.keys(D.datasets).forEach(tf=>$('tf').add(new Option(tf,tf))); $('tf').value='daily';
+[...new Set(D.labels.map(l=>l.degree))].forEach(d=>$('degree').add(new Option(d,d)));
+D.notes.forEach(n=>{let p=document.createElement('p');p.className='note';p.textContent=n;$('notes').append(p)});
+$('source').textContent=JSON.stringify({source:D.plan.source,plan_hash:D.plan.content_hash,datasets:Object.fromEntries(Object.entries(D.datasets).map(([k,v])=>[k,{metadata:v.metadata,sha256:v.file_sha256}]))},null,2);
+const colors={primary:'#1466ae',alternative:'#ac387b',shared:'#34745a'};
+let current=[], shownLabels=[];
+function mapPivot(p,rows,tf){
+ const date=p.timestamp.slice(0,10), t=Date.parse(p.timestamp);
+ if(tf==='daily')return rows.findIndex(c=>c.date.slice(0,10)===date);
+ if(tf==='monthly'||tf==='weekly'){
+  if(t<Date.parse(rows[0].date))return -1;
+  const duration=tf==='weekly'?7*86400000:32*86400000;
+  return rows.findIndex((c,i)=>t>=Date.parse(c.date)&&t<(i+1<rows.length?Date.parse(rows[i+1].date):Date.parse(c.date)+duration));
+ }
+ // A daily extremum has no intrabar timestamp. Place it only on a unique matching native extremum.
+ const matches=rows.map((c,i)=>c.date.slice(0,10)===date&&Math.abs(c[p.kind]-p.price)<0.0001?i:-1).filter(i=>i>=0);
+ return matches.length===1?matches[0]:-1;
+}
+async function draw(){
+ const tf=$('tf').value, rows=D.datasets[tf].candles, x=rows.map((_,i)=>i), indicator=$('indicator').value;
+ current=rows; const n=rows.length, up=rows.map(c=>c.close>=c.open?'#17856c':'#d24e54');
+ const traces=[{type:'candlestick',x,open:rows.map(c=>c.open),high:rows.map(c=>c.high),low:rows.map(c=>c.low),close:rows.map(c=>c.close),increasing:{line:{color:'#17856c'}},decreasing:{line:{color:'#d24e54'}},name:'OHLC',yaxis:'y'},
+ {type:'bar',x,y:rows.map(c=>c.volume),marker:{color:up},name:'Volume',yaxis:'y2',hoverinfo:'skip'},
+ {type:'scatter',mode:'lines',x,y:rows.map(c=>c[indicator]),line:{color:'#955cba',width:1.5},name:indicator.toUpperCase(),yaxis:'y3',connectgaps:false,hoverinfo:'skip'}];
+ if(indicator==='macd')traces.push({type:'scatter',mode:'lines',x,y:rows.map(c=>c.macd_signal),line:{color:'#bc7a19',width:1.3},name:'Signal',yaxis:'y3',hoverinfo:'skip'});
+ const annotations=[], stacks=new Map(); shownLabels=[];
+ const visible=D.labels.filter(l=>($('role').value==='both'||l.hypothesis_role==='shared'||l.hypothesis_role===$('role').value)&&($('degree').value==='All'||l.degree===$('degree').value));
+ let hidden=0;
+ visible.forEach(l=>{const i=mapPivot(l.pivot,rows,tf); if(i<0){hidden++;return} const above=l.placement==='above',key=i+':'+l.placement,stack=stacks.get(key)||0;stacks.set(key,stack+1);
+ annotations.push({x:i,y:above?rows[i].high:rows[i].low,xref:'x',yref:'y',text:l.display_text,showarrow:false,yshift:(above?1:-1)*(18+stack*19),font:{color:colors[l.hypothesis_role],size:14},captureevents:true,name:l.label_id}); shownLabels.push(l);});
+ const shapes=[];
+ if($('levels').checked) D.levels.filter(l=>$('role').value==='both'||l.role==='shared'||l.role===$('role').value).forEach(l=>{shapes.push({type:'line',xref:'paper',x0:0,x1:1,yref:'y',y0:l.price,y1:l.price,line:{color:colors[l.role],width:1,dash:'dot'}});annotations.push({x:1,xref:'paper',y:l.price,yref:'y',text:l.label+' '+l.price.toFixed(2),xanchor:'left',showarrow:false,font:{size:10,color:colors[l.role]}})});
+ if(indicator==='rsi14') [30,50,70].forEach(v=>shapes.push({type:'line',xref:'paper',x0:0,x1:1,yref:'y3',y0:v,y1:v,line:{color:'#b0b5bd',width:1,dash:'dot'}}));
+ const step=Math.max(1,Math.floor(n/10)), ticks=x.filter(i=>i%step===0);
+ const layout={paper_bgcolor:'#ffffff',plot_bgcolor:'#ffffff',font:{family:'Arial',color:'#343d48'},margin:{l:60,r:innerWidth<800?130:175,t:42,b:42},showlegend:false,dragmode:'pan',hovermode:'closest',annotations,shapes,
+ xaxis:{range:[Math.max(0,n-(tf==='monthly'?100:tf==='weekly'?156:180)),n+3],tickvals:ticks,ticktext:ticks.map(i=>rows[i].date.slice(0,10)),rangeslider:{visible:false},showgrid:false},
+ yaxis:{domain:[.36,1],type:$('scale').value,autorange:true,gridcolor:'#edf0f3',fixedrange:false,title:'USD'},yaxis2:{domain:[.20,.30],gridcolor:'#edf0f3',title:'Volume'},yaxis3:{domain:[0,.15],gridcolor:'#edf0f3',title:indicator==='rsi14'?'RSI':indicator.toUpperCase(),range:indicator==='rsi14'?[0,100]:undefined},uirevision:tf+'-'+$('scale').value};
+ await Plotly.react(chart,traces,layout,{responsive:true,scrollZoom:true,displaylogo:false,modeBarButtonsToRemove:['select2d','lasso2d']});
+ // Fit the price axis to the visible interval, with space for stacked labels.
+ function fit(range){const a=Math.max(0,Math.floor(range[0])),b=Math.min(n,Math.ceil(range[1])+1),slice=rows.slice(a,b);if(!slice.length)return;let lo=Math.min(...slice.map(c=>c.low)),hi=Math.max(...slice.map(c=>c.high));if($('scale').value==='log'){lo=Math.log10(lo);hi=Math.log10(hi)}const pad=(hi-lo)*.15||1;const stride=Math.max(1,Math.floor((b-a)/(innerWidth<800?3:7))),visibleTicks=[];for(let i=a;i<b;i+=stride)visibleTicks.push(i);Plotly.relayout(chart,{'yaxis.range':[lo-pad,hi+pad],'yaxis.autorange':false,'yaxis2.range':[0,Math.max(...slice.map(c=>c.volume))*1.1],'xaxis.tickvals':visibleTicks,'xaxis.ticktext':visibleTicks.map(i=>rows[i].date.slice(0,10))})}
+ chart.removeAllListeners('plotly_relayout');chart.on('plotly_relayout',e=>{if(e['xaxis.range[0]']!==undefined)fit([e['xaxis.range[0]'],e['xaxis.range[1]']]);else if(e['xaxis.autorange'])fit([0,n-1])});fit(layout.xaxis.range);
+ chart.removeAllListeners('plotly_hover');chart.on('plotly_hover',e=>{const c=rows[Math.round(e.points[0].x)];if(c)$('tooltip').textContent=c.date+' | O '+c.open.toFixed(2)+' H '+c.high.toFixed(2)+' L '+c.low.toFixed(2)+' C '+c.close.toFixed(2)+' | '+indicator.toUpperCase()+' '+(c[indicator]===null?'Unavailable':c[indicator].toFixed(2))+' | Volume '+c.volume.toLocaleString()});
+ chart.removeAllListeners('plotly_clickannotation');chart.on('plotly_clickannotation',e=>{const l=shownLabels[e.index];if(l)$('detail').textContent=l.hypothesis_role+' | '+l.degree+' '+l.text+' | '+l.status+' | '+l.pivot.timestamp+' | $'+l.pivot.price+' | Source: '+l.pivot.source_timeframe});
+ $('coverage').textContent=rows[0].date.slice(0,10)+' to '+rows[n-1].date.slice(0,10)+' | '+n.toLocaleString()+' saved completed bars | '+hidden+' labels outside coverage or without an exact candle mapping';
+ window.reportReady=true;
+}
+['tf','role','degree','scale','indicator','levels'].forEach(id=>$(id).addEventListener('change',()=>draw().catch(e=>$('coverage').textContent=e.message)));
+$('reset').onclick=()=>{Plotly.purge(chart);draw()};let resizeTimer;window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{Plotly.purge(chart);draw()},150)});draw();
+</script></body></html>

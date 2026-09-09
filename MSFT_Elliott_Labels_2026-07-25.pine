@@ -1,0 +1,136 @@
+//@version=6
+indicator("MSFT Elliott Labels 2026-07-25", overlay=true, max_labels_count=100)
+
+showForecasts = input.bool(true, "Show conditional targets")
+
+cycleColor = color.rgb(29, 78, 216)
+primaryDownColor = color.rgb(185, 28, 28)
+primaryUpColor = color.rgb(21, 128, 61)
+intermediateColor = color.rgb(126, 34, 206)
+minorColor = color.rgb(15, 118, 110)
+minuteOneColor = color.rgb(37, 99, 235)
+minuteTwoColor = color.rgb(217, 119, 6)
+minuteThreeColor = color.rgb(124, 58, 237)
+minuteFourColor = color.rgb(5, 150, 105)
+minuteFiveColor = color.rgb(220, 38, 38)
+candidateColor = color.rgb(180, 83, 9)
+
+var labels = array.new<label>()
+
+clearLabels() =>
+    while array.size(labels) > 0
+        label.delete(array.pop(labels))
+
+addTimeLabel(int labelTime, float labelPrice, string labelText, color textColor, string textSize) =>
+    newLabel = label.new(
+         labelTime,
+         labelPrice,
+         labelText,
+         xloc=xloc.bar_time,
+         yloc=yloc.price,
+         style=label.style_none,
+         textcolor=textColor,
+         size=textSize,
+         textalign=text.align_center)
+    array.push(labels, newLabel)
+
+addFutureLabel(int barsAhead, float labelPrice, string labelText, color textColor, string textSize) =>
+    newLabel = label.new(
+         bar_index + barsAhead,
+         labelPrice,
+         labelText,
+         xloc=xloc.bar_index,
+         yloc=yloc.price,
+         style=label.style_none,
+         textcolor=textColor,
+         size=textSize,
+         textalign=text.align_center)
+    array.push(labels, newLabel)
+
+if barstate.islast
+    clearLabels()
+
+    chartSeconds = timeframe.in_seconds()
+    macroScale = chartSeconds > timeframe.in_seconds("1W")
+    showPrimaryHistory = chartSeconds >= timeframe.in_seconds("1D")
+    showIntermediateHistory = chartSeconds >= timeframe.in_seconds("240") and chartSeconds <= timeframe.in_seconds("1W")
+    showCurrentParents = chartSeconds <= timeframe.in_seconds("1D")
+    showMinute = chartSeconds <= timeframe.in_seconds("240")
+
+    // Completed Cycle endpoints.
+    addTimeLabel(timestamp("America/New_York", 1999, 12, 30, 16, 0), macroScale ? 85.00 : 68.00, "I", cycleColor, size.large)
+    addTimeLabel(timestamp("America/New_York", 2009, 3, 6, 16, 0), macroScale ? 9.50 : 11.70, "II", cycleColor, size.large)
+    addTimeLabel(timestamp("America/New_York", 2025, 7, 31, 16, 0), macroScale ? 750.00 : 600.00, "III", cycleColor, size.large)
+
+    if showPrimaryHistory
+        // Primary endpoints inside Cycle I.
+        addTimeLabel(timestamp("America/New_York", 1987, 10, 6, 16, 0), 0.60, "1", minuteOneColor, size.normal)
+        addTimeLabel(timestamp("America/New_York", 1987, 10, 26, 16, 0), 0.225, "2", minuteTwoColor, size.normal)
+        addTimeLabel(timestamp("America/New_York", 1995, 7, 17, 16, 0), 7.30, "3", minuteThreeColor, size.normal)
+        addTimeLabel(timestamp("America/New_York", 1995, 10, 10, 16, 0), 4.60, "4", minuteFourColor, size.normal)
+        addTimeLabel(timestamp("America/New_York", 1999, 12, 30, 16, 0), macroScale ? 65.00 : 63.00, "5", minuteFiveColor, size.normal)
+
+        // Primary A-B-C inside Cycle II.
+        addTimeLabel(timestamp("America/New_York", 2002, 7, 24, 16, 0), 19.20, "A", primaryDownColor, size.normal)
+        addTimeLabel(timestamp("America/New_York", 2007, 11, 2, 16, 0), 39.30, "B", primaryUpColor, size.normal)
+        addTimeLabel(timestamp("America/New_York", 2009, 3, 6, 16, 0), macroScale ? 14.00 : 13.40, "C", primaryDownColor, size.normal)
+
+        // Primary endpoints inside Cycle III.
+        addTimeLabel(timestamp("America/New_York", 2010, 4, 23, 16, 0), 33.20, "1", minuteOneColor, size.normal)
+        addTimeLabel(timestamp("America/New_York", 2010, 7, 1, 16, 0), 21.30, "2", minuteTwoColor, size.normal)
+        addTimeLabel(timestamp("America/New_York", 2021, 11, 22, 16, 0), 366.00, "3", minuteThreeColor, size.normal)
+        addTimeLabel(timestamp("America/New_York", 2022, 11, 4, 16, 0), 200.00, "4", minuteFourColor, size.normal)
+        addTimeLabel(timestamp("America/New_York", 2025, 7, 31, 16, 0), macroScale ? 620.00 : 580.00, "5", minuteFiveColor, size.normal)
+
+        // Cycle IV Primary A-B-C.
+        addTimeLabel(timestamp("America/New_York", 2026, 3, 30, 16, 0), 340.00, "A", primaryDownColor, size.normal)
+        addTimeLabel(timestamp("America/New_York", 2026, 6, 1, 16, 0), 476.00, "B", primaryUpColor, size.normal)
+
+    if showIntermediateHistory
+        // Intermediate endpoints inside Cycle III, Primary 3.
+        addTimeLabel(timestamp("America/New_York", 2012, 3, 16, 16, 0), 34.50, "(1)", intermediateColor, size.small)
+        addTimeLabel(timestamp("America/New_York", 2012, 12, 5, 16, 0), 24.80, "(2)", intermediateColor, size.small)
+        addTimeLabel(timestamp("America/New_York", 2020, 2, 11, 16, 0), 198.00, "(3)", intermediateColor, size.small)
+        addTimeLabel(timestamp("America/New_York", 2020, 3, 23, 16, 0), 125.00, "(4)", intermediateColor, size.small)
+        addTimeLabel(timestamp("America/New_York", 2021, 11, 22, 16, 0), 356.00, "(5)", intermediateColor, size.small)
+
+        // Intermediate endpoints inside Cycle III, Primary 5.
+        addTimeLabel(timestamp("America/New_York", 2022, 12, 13, 16, 0), 271.00, "(1)", intermediateColor, size.small)
+        addTimeLabel(timestamp("America/New_York", 2023, 1, 6, 16, 0), 211.00, "(2)", intermediateColor, size.small)
+        addTimeLabel(timestamp("America/New_York", 2024, 7, 5, 16, 0), 480.00, "(3)", intermediateColor, size.small)
+        addTimeLabel(timestamp("America/New_York", 2025, 4, 7, 16, 0), 334.00, "(4)", intermediateColor, size.small)
+        addTimeLabel(timestamp("America/New_York", 2025, 7, 31, 16, 0), 565.00, "(5)", intermediateColor, size.small)
+
+        // Intermediate endpoints inside Cycle IV, Primary A.
+        addTimeLabel(timestamp("America/New_York", 2025, 9, 5, 16, 0), 484.00, "(1)", intermediateColor, size.small)
+        addTimeLabel(timestamp("America/New_York", 2025, 10, 28, 16, 0), 562.00, "(2)", intermediateColor, size.small)
+        addTimeLabel(timestamp("America/New_York", 2026, 1, 21, 16, 0), 430.00, "(3)", intermediateColor, size.small)
+        addTimeLabel(timestamp("America/New_York", 2026, 1, 28, 16, 0), 492.00, "(4)", intermediateColor, size.small)
+        addTimeLabel(timestamp("America/New_York", 2026, 3, 30, 16, 0), 349.00, "(5)", intermediateColor, size.small)
+
+    if showCurrentParents
+        // Minor endpoints inside Primary C, Intermediate (1).
+        addTimeLabel(timestamp("America/New_York", 2026, 6, 3, 16, 0), 418.00, "1", minuteOneColor, size.small)
+        addTimeLabel(timestamp("America/New_York", 2026, 6, 4, 16, 0), 442.00, "2", minuteTwoColor, size.small)
+        addTimeLabel(timestamp("America/New_York", 2026, 6, 22, 16, 0), 360.00, "3", minuteThreeColor, size.small)
+        addTimeLabel(timestamp("America/New_York", 2026, 6, 24, 16, 0), 384.00, "4", minuteFourColor, size.small)
+
+        // $349.20 is Intermediate (1), but also the valid alternate C / IV endpoint.
+        addTimeLabel(timestamp("America/New_York", 2026, 6, 25, 16, 0), 344.00, "5", minuteFiveColor, size.small)
+        addTimeLabel(timestamp("America/New_York", 2026, 6, 25, 16, 0), 337.00, "(1)", intermediateColor, size.normal)
+        addTimeLabel(timestamp("America/New_York", 2026, 6, 25, 16, 0), 330.00, "C?", primaryDownColor, size.normal)
+        addTimeLabel(timestamp("America/New_York", 2026, 6, 25, 16, 0), 323.00, "IV?", candidateColor, size.normal)
+        addTimeLabel(timestamp("America/New_York", 2026, 7, 16, 16, 0), 412.00, "(2)", intermediateColor, size.normal)
+
+    if showMinute
+        // Active Minor 1 inside Intermediate (3): Minute i-iv complete, Minute v preferred active.
+        addTimeLabel(timestamp("America/New_York", 2026, 7, 17, 11, 15), 386.80, "i", minuteOneColor, size.normal)
+        addTimeLabel(timestamp("America/New_York", 2026, 7, 20, 12, 30), 406.00, "ii", minuteTwoColor, size.normal)
+        addTimeLabel(timestamp("America/New_York", 2026, 7, 23, 11, 0), 374.80, "iii", minuteThreeColor, size.normal)
+        addTimeLabel(timestamp("America/New_York", 2026, 7, 24, 9, 30), 392.00, "iv", minuteFourColor, size.normal)
+
+        if showForecasts
+            // This cluster completes Minute v and probably Minor 1, not Intermediate (3).
+            addFutureLabel(26, 372.75, "v?\n1?\n372.44-373.08", minuteFiveColor, size.normal)
+            // Minor 2 range is conditional on Minor 1 completing in the displayed target cluster.
+            addFutureLabel(52, 389.20, "2?\n385-393", minorColor, size.normal)
